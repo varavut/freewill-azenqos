@@ -130,7 +130,10 @@ class AzenqosDialog(QMainWindow):
                     )
                     if len(toBeRemoved) > 0:
                         QgsProject.instance().removeMapLayer(toBeRemoved[0])
-                        gc.activeLayers.remove(" ".join(name[1:]))
+                        try:
+                            gc.activeLayers.remove(" ".join(name[1:]))
+                        except:
+                            pass
 
                 # Setting up layer data source
                 layer.setName(" ".join(name[1:]))
