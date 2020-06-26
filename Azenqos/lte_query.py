@@ -17,145 +17,226 @@ class LteDataQuery:
             dataList.append(["Time", self.timeFilter, "", ""])
             condition = "WHERE time <= '%s'" % (self.timeFilter)
         elementDictList = [
+            {"name": "Time", "column": ["global_time"], "table": "global_time",},
             {
                 "name": "Band",
-                "column": "lte_band_1,lte_band_2,lte_band_3",
+                "column": ["lte_band_1", "lte_band_2", "lte_band_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "E-ARFCN",
-                "column": "lte_earfcn_1,lte_earfcn_2,lte_earfcn_3",
+                "column": ["lte_earfcn_1", "lte_earfcn_2", "lte_earfcn_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving PCI",
-                "column": "lte_physical_cell_id_1,lte_physical_cell_id_2,lte_physical_cell_id_3",
+                "column": [
+                    "lte_physical_cell_id_1",
+                    "lte_physical_cell_id_2",
+                    "lte_physical_cell_id_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRP[0]",
-                "column": "lte_inst_rsrp_rx0_1,lte_inst_rsrp_rx0_2,lte_inst_rsrp_rx0_3",
+                "column": [
+                    "lte_inst_rsrp_rx0_1",
+                    "lte_inst_rsrp_rx0_2",
+                    "lte_inst_rsrp_rx0_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRP[1]",
-                "column": "lte_inst_rsrp_rx1_1,lte_inst_rsrp_rx1_2,lte_inst_rsrp_rx1_3",
+                "column": [
+                    "lte_inst_rsrp_rx1_1",
+                    "lte_inst_rsrp_rx1_2",
+                    "lte_inst_rsrp_rx1_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRP",
-                "column": "lte_inst_rsrp_1,lte_inst_rsrp_2,lte_inst_rsrp_3",
+                "column": ["lte_inst_rsrp_1", "lte_inst_rsrp_2", "lte_inst_rsrp_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRQ[0]",
-                "column": "lte_inst_rsrq_rx0_1,lte_inst_rsrq_rx0_2,lte_inst_rsrq_rx0_3",
+                "column": [
+                    "lte_inst_rsrq_rx0_1",
+                    "lte_inst_rsrq_rx0_2",
+                    "lte_inst_rsrq_rx0_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRQ[1]",
-                "column": "lte_inst_rsrq_rx1_1,lte_inst_rsrq_rx1_2,lte_inst_rsrq_rx1_3",
+                "column": [
+                    "lte_inst_rsrq_rx1_1",
+                    "lte_inst_rsrq_rx1_2",
+                    "lte_inst_rsrq_rx1_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "Serving RSRQ",
-                "column": "lte_inst_rsrq_1,lte_inst_rsrq_2,lte_inst_rsrq_3",
+                "column": ["lte_inst_rsrq_1", "lte_inst_rsrq_2", "lte_inst_rsrq_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "SINR Rx[0]",
-                "column": "lte_sinr_rx0_1,lte_sinr_rx0_2,lte_sinr_rx0_3",
+                "column": ["lte_sinr_rx0_1", "lte_sinr_rx0_2", "lte_sinr_rx0_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "SINR Rx[1]",
-                "column": "lte_sinr_rx1_1,lte_sinr_rx1_2,lte_sinr_rx1_3",
+                "column": ["lte_sinr_rx1_1", "lte_sinr_rx1_2", "lte_sinr_rx1_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "SINR",
-                "column": "lte_sinr_1,lte_sinr_2,lte_sinr_3",
+                "column": ["lte_sinr_1", "lte_sinr_2", "lte_sinr_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "RSSI Rx[0]",
-                "column": "lte_inst_rssi_rx0_1,lte_inst_rssi_rx0_2,lte_inst_rssi_rx0_3",
+                "column": [
+                    "lte_inst_rssi_rx0_1",
+                    "lte_inst_rssi_rx0_2",
+                    "lte_inst_rssi_rx0_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "RSSI Rx[1]",
-                "column": "lte_inst_rssi_rx1_1,lte_inst_rssi_rx1_2,lte_inst_rssi_rx1_3",
+                "column": [
+                    "lte_inst_rssi_rx1_1",
+                    "lte_inst_rssi_rx1_2",
+                    "lte_inst_rssi_rx1_3",
+                ],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "RSSI",
-                "column": "lte_inst_rssi_1,lte_inst_rssi_2,lte_inst_rssi_3",
+                "column": ["lte_inst_rssi_1", "lte_inst_rssi_2", "lte_inst_rssi_3"],
                 "table": "lte_cell_meas",
             },
             {
                 "name": "BLER",
-                "column": "lte_bler_1,lte_bler_2,lte_bler_3",
+                "column": ["lte_bler_1", "lte_bler_2", "lte_bler_3"],
                 "table": "lte_l1_dl_tp",
             },
             {
                 "name": "CQI CW[0]",
-                "column": "lte_cqi_cw0_1,lte_cqi_cw0_2,lte_cqi_cw0_3",
+                "column": ["lte_cqi_cw0_1", "lte_cqi_cw0_2", "lte_cqi_cw0_3"],
                 "table": "lte_cqi",
             },
             {
                 "name": "CQI CW[1]",
-                "column": "lte_cqi_cw1_1,lte_cqi_cw1_2,lte_cqi_cw1_3",
+                "column": ["lte_cqi_cw1_1", "lte_cqi_cw1_2", "lte_cqi_cw1_3"],
                 "table": "lte_cqi",
             },
+            {"name": "Tx Power", "column": ["lte_tx_power"], "table": "lte_tx_power",},
+            {
+                "name": "PUCCH TxPower (dBm)",
+                "column": ["lte_pucch_tx_power"],
+                "table": "lte_pucch_tx_info",
+            },
+            {
+                "name": "PUSCH TxPower (dBm)",
+                "column": ["lte_pusch_tx_power"],
+                "table": "lte_pusch_tx_info",
+            },
+            {
+                "name": "TimingAdvance",
+                "column": ["lte_ta"],
+                "table": "lte_frame_timing",
+            },
+            {
+                "name": "Transmission Mode (RRC-tm)",
+                "column": ["lte_transmission_mode_l3"],
+                "table": "lte_rrc_transmode_info",
+            },
+            {
+                "name": "LTE RRC State",
+                "column": ["lte_rrc_state"],
+                "table": "lte_rrc_state",
+            },
+            {
+                "name": "LTE EMM State",
+                "column": ["lte_emm_state"],
+                "table": "lte_emm_state",
+            },
+            {
+                "name": "LTE EMM Substate",
+                "column": ["lte_emm_substate"],
+                "table": "lte_emm_state",
+            },
+            {
+                "name": "Modem ServCellInfo",
+                "column": [],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "Allowed Access",
+                "column": ["lte_serv_cell_info_allowed_access"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "MCC",
+                "column": ["lte_serv_cell_info_mcc"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "MNC",
+                "column": ["lte_serv_cell_info_mnc"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "TAC",
+                "column": ["lte_serv_cell_info_tac"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "Cell ID (ECI)",
+                "column": ["lte_serv_cell_info_eci"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "eNodeB ID",
+                "column": ["lte_serv_cell_info_enb_id"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "LCI",
+                "column": ["lte_scc_derived_lci"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "PCI",
+                "column": ["lte_serv_cell_info_pci"],
+                "table": "lte_serv_cell_info",
+            },
         ]
-        for dic in elementDictList:
-            name = dic["name"]
-            column = dic["column"]
-            table = dic["table"]
-            query = QSqlQuery()
-            if column != "" and table != "":
-                queryString = """SELECT %s
-                            FROM %s
-                            %s
-                            ORDER BY time DESC
-                            LIMIT 1""" % (
-                    column,
-                    table,
-                    condition,
-                )
-                query.exec_(queryString)
-                if query.first():
-                    dataList.append(
-                        [
-                            name,
-                            query.value(0) or "",
-                            query.value(1) or "",
-                            query.value(2) or "",
-                        ]
-                    )
-                else:
-                    dataList.append(
-                        [name, "", "", "",]
-                    )
 
         fieldsList = [
-            "Tx Power",
-            "PUCCH TxPower (dBm)",
-            "PUSCH TxPower (dBm)",
-            "TimingAdvance",
-            "Transmission Mode (RRC-tm)",
-            "LTE RRC State",
-            "LTE EMM State",
-            "LTE RRC Substate",
-            "Modern ServCellInfo",
-            "Allowed Access",
-            "MCC",
-            "MNC",
-            "TAC",
-            "Cell ID (ECI)",
-            "eNodeB ID",
-            "LCI",
-            "PCI",
+            # "Tx Power",
+            # "PUCCH TxPower (dBm)",
+            # "PUSCH TxPower (dBm)",
+            # "TimingAdvance",
+            # "Transmission Mode (RRC-tm)",
+            # "LTE RRC State",
+            # "LTE EMM State",
+            # "LTE RRC Substate",
+            # "Modern ServCellInfo",
+            # "Allowed Access",
+            # "MCC",
+            # "MNC",
+            # "TAC",
+            # "Cell ID (ECI)",
+            # "eNodeB ID",
+            # "LCI",
+            # "PCI",
             "Derived SCC ECI",
             "Derived SCC eNodeB ID",
             "Derived SCC LCI",
@@ -228,7 +309,7 @@ class LteDataQuery:
                 value = ""
                 dataList.append([columnName, value, "", ""])
         self.closeConnection()
-        return dataList
+        return elementDictList
 
     def getServingAndNeighbors(self):
         self.openConnection()

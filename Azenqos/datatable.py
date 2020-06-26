@@ -18,6 +18,7 @@ from PyQt5.QtGui import *
 from qgis.core import *
 from qgis.utils import *
 from qgis.gui import *
+from itertools import groupby
 from .globalutils import Utils
 from .filter_header import *
 from .gsm_query import GsmDataQuery
@@ -44,18 +45,19 @@ class TableWindow(QWidget):
         self.width = 640
         self.height = 480
         self.dataList = []
-        self.customData = []
-        self.customHeader = []
+        self.customData = []  # For customize cell with text
+        self.customHeader = []  # For customize header with text
+        self.appliedSchema = []  # For customize cell with schema
         self.currentRow = 0
         self.dateString = ""
         self.tableViewCount = 0
         self.parentWindow = parent
         self.setupUi()
-        # self.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self.customContextMenuRequested.connect(self.generateMenu)
-        # self.properties_window = PropertiesWindow(
-        #     self, gc.azenqosDatabase, self.dataList, self.tableHeader
-        # )
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.generateMenu)
+        self.properties_window = PropertiesWindow(
+            self, gc.azenqosDatabase, self.dataList, self.tableHeader
+        )
 
     def setupUi(self):
         self.setObjectName(self.title)
@@ -108,13 +110,6 @@ class TableWindow(QWidget):
 
     def setTableModel(self, dataList):
         if self.rows and self.columns:
-
-            if len(dataList) >= self.rows:
-                if self.rows < self.fetchRows:
-                    self.fetchRows = self.rows
-
-                dataList = dataList[: self.fetchRows]
-
             while len(dataList) < self.rows:
                 dataList.append([])
 
@@ -288,9 +283,11 @@ class TableWindow(QWidget):
             # LTE
             elif self.title == "LTE_Radio Parameters":
                 self.tableHeader = ["Element", "PCC", "SCC0", "SCC1"]
-                self.dataList = LteDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRadioParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRadioParameters()
+                )
             elif self.title == "LTE_Serving + Neighbors":
                 self.tableHeader = ["Time", "EARFCN", "Band", "PCI", "RSRP", "RSRQ"]
                 self.dataList = LteDataQuery(
@@ -409,8 +406,18 @@ class TableWindow(QWidget):
                     gc.azenqosDatabase, gc.currentDateTimeString
                 ).getDebugAndroidEvent()
 
-            if self.dataList is not None:
+            if not self.dataList or self.title not in [
+                "Signaling_Events",
+                "Signaling_Layer 1 Messages",
+                "Signaling_Layer 3 Messages",
+            ]:
+                self.queryFromSchema()
+
+            else:
                 self.setTableModel(self.dataList)
+
+            if self.dataList is not None:
+                # self.setTableModel(self.dataList)
                 self.tableViewCount = self.tableView.model().rowCount()
 
             # if self.tablename and self.tablename != "":
@@ -423,6 +430,35 @@ class TableWindow(QWidget):
     #         pass
     #     elif QMouseEvent.button() == Qt.RightButton:
     #         self.generateMenu
+
+    def initializeQuerySchema(self, elementDict):
+        # [table,value,row,column]
+        activeSchema = []
+        self.columns = len(self.tableHeader)
+        self.rows = len(elementDict)
+        for row, element in enumerate(elementDict):
+            rowTitle = {"row": row, "column": 0, "text": element["name"]}
+            self.customData.append(rowTitle)
+            for column, item in enumerate(element["column"]):
+                activeSchema.append([element["table"], item, row, column + 1])
+
+        return activeSchema
+
+    def queryFromSchema(self):
+        self.dataList = []
+        for r in range(self.rows):
+            content = []
+            for c in range(self.columns):
+                content.append("")
+            self.dataList.append(content)
+
+        result = CustomizeQuery(
+            gc.azenqosDatabase, self.appliedSchema, self, gc.currentDateTimeString
+        ).query()
+        for data in result:
+            self.dataList[data[1]][data[2]] = data[0]
+
+        self.updateTable()
 
     def setHeader(self, headers):
         # self.tableHeader = headers
@@ -454,7 +490,7 @@ class TableWindow(QWidget):
             "Signaling_Layer 1 Messages",
             "Signaling_Layer 3 Messages",
         ]:
-            worker = Worker(self.specifyTablesHeader())
+            worker = Worker(self.queryFromSchema())
         else:
             worker = Worker(self.findCurrentRow())
 
@@ -601,3 +637,84 @@ class TableModel(QAbstractTableModel):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return self.headerLabels[section]
         return QAbstractTableModel.headerData(self, section, orientation, role)
+
+
+class CustomizeQuery:
+    def __init__(self, database, inputData: list, window, globalTime: str):
+        self.db = database
+        self.inputData = inputData[:]
+        self.tableWindow = window
+        self.globalTime = globalTime
+        self.allSelectedColumns = []
+        self.queryString = []
+        self.queryTable = []
+
+    def query(self):
+        condition = ""
+        result = []
+        # inputdata = ['table','value','row',column']
+
+        for item in self.inputData:
+            if item[0] == "global_time":
+                self.tableWindow.dataList[item[2]][item[3]] = gc.currentDateTimeString
+                self.inputData.remove(item)
+                break
+
+        key_func = lambda x: x[0]
+        self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
+
+        for tableIndex, schema in enumerate(self.groupedSchema):
+
+            if self.globalTime:
+                condition = "WHERE time <= '%s'" % (self.globalTime)
+
+            selectedColumns = []
+            tableData = None
+            for data in schema:
+                if len(data[1]) > 0:
+                    selectedColumns.append(data[1])
+                    if not tableData:
+                        tableData = data[0]
+                        self.queryTable.append(tableData)
+                else:
+                    schema.remove(data)
+                    continue
+            self.allSelectedColumns += selectedColumns
+            selectedColumns = ",".join(selectedColumns)
+            queryString = (
+                "( SELECT %s,1 as row_num FROM %s %s ORDER BY time DESC LIMIT 1 ) %s "
+                % (selectedColumns, tableData, condition, tableData)
+            )
+            if not tableIndex == 0:
+                queryString = "JOIN %s ON %s.row_num=%s.row_num " % (
+                    queryString,
+                    self.queryTable[tableIndex - 1],
+                    self.queryTable[tableIndex],
+                )
+
+            self.queryString.append(queryString)
+
+        columnString = ",".join(self.allSelectedColumns)
+        joinString = " ".join(self.queryString)
+        queryAll = "SELECT %s FROM  %s" % (columnString, joinString)
+
+        if not self.db.isOpen():
+            self.db.open()
+
+        query = QSqlQuery()
+        query.exec_(queryAll)
+        if query.first():
+            for i in range(len(self.inputData)):
+                output = [
+                    str(query.value(i)),
+                    self.inputData[i][2],
+                    self.inputData[i][3],
+                ]
+                result.append(output)
+        else:
+            for i in range(len(self.inputData)):
+                output = ["", self.inputData[i][2], self.inputData[i][3]]
+                result.append(output)
+        self.db.close()
+
+        return result
