@@ -217,6 +217,41 @@ class LteDataQuery:
                 "column": ["lte_serv_cell_info_pci"],
                 "table": "lte_serv_cell_info",
             },
+            {
+                "name": "Derived SCC ECI",
+                "column": ["lte_scc_derived_eci"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "Derived SCC eNodeB ID",
+                "column": ["lte_scc_derived_enb_id"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "Derived SCC LCI",
+                "column": ["lte_scc_derived_lci"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "DL EARFCN",
+                "column": ["lte_serv_cell_info_dl_freq"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "UL EARFCN",
+                "column": ["lte_serv_cell_info_ul_freq"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "DL Bandwidth (Mhz)",
+                "column": ["lte_serv_cell_info_dl_bandwidth_mhz"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "name": "UL Bandwidth (Mhz)",
+                "column": ["lte_serv_cell_info_ul_bandwidth_mhz"],
+                "table": "lte_serv_cell_info",
+            },
         ]
 
         fieldsList = [
@@ -237,13 +272,13 @@ class LteDataQuery:
             # "eNodeB ID",
             # "LCI",
             # "PCI",
-            "Derived SCC ECI",
-            "Derived SCC eNodeB ID",
-            "Derived SCC LCI",
-            "DL EARFCN",
-            "UL EARFCN",
-            "DL Bandwidth (Mhz)",
-            "UL Bandwidth (Mhz)",
+            # "Derived SCC ECI",
+            # "Derived SCC eNodeB ID",
+            # "Derived SCC LCI",
+            # "DL EARFCN",
+            # "UL EARFCN",
+            # "DL Bandwidth (Mhz)",
+            # "UL Bandwidth (Mhz)",
             "SCC DL Bandwidth (Mhz)",
             "SIB1 info:",
             "sib1 MCC",

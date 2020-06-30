@@ -440,7 +440,14 @@ class TableWindow(QWidget):
             rowTitle = {"row": row, "column": 0, "text": element["name"]}
             self.customData.append(rowTitle)
             for column, item in enumerate(element["column"]):
-                activeSchema.append([element["table"], item, row, column + 1])
+                activeSchema.append(
+                    {
+                        "table": element["table"],
+                        "field": item,
+                        "row": row,
+                        "column": column + 1,
+                    }
+                )
 
         return activeSchema
 
@@ -652,15 +659,17 @@ class CustomizeQuery:
     def query(self):
         condition = ""
         result = []
-        # inputdata = ['table','value','row',column']
+        # inputdata = ['table','field','row',column']
 
         for item in self.inputData:
-            if item[0] == "global_time":
-                self.tableWindow.dataList[item[2]][item[3]] = gc.currentDateTimeString
+            if item["table"] == "global_time":
+                self.tableWindow.dataList[item["row"]][
+                    item["column"]
+                ] = gc.currentDateTimeString
                 self.inputData.remove(item)
                 break
 
-        key_func = lambda x: x[0]
+        key_func = lambda x: x["table"]
         self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
 
         for tableIndex, schema in enumerate(self.groupedSchema):
@@ -671,10 +680,10 @@ class CustomizeQuery:
             selectedColumns = []
             tableData = None
             for data in schema:
-                if len(data[1]) > 0:
-                    selectedColumns.append(data[1])
+                if len(data["field"]) > 0:
+                    selectedColumns.append(data["field"])
                     if not tableData:
-                        tableData = data[0]
+                        tableData = data["table"]
                         self.queryTable.append(tableData)
                 else:
                     schema.remove(data)
@@ -707,13 +716,13 @@ class CustomizeQuery:
             for i in range(len(self.inputData)):
                 output = [
                     str(query.value(i)),
-                    self.inputData[i][2],
-                    self.inputData[i][3],
+                    self.inputData[i]["row"],
+                    self.inputData[i]["column"],
                 ]
                 result.append(output)
         else:
             for i in range(len(self.inputData)):
-                output = ["", self.inputData[i][2], self.inputData[i][3]]
+                output = ["", self.inputData[i]["row"], self.inputData[i]["column"]]
                 result.append(output)
         self.db.close()
 
