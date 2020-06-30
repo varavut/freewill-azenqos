@@ -232,7 +232,7 @@ class CellSetting(QWidget):
             queryString = "SELECT name FROM sqlite_master WHERE type ='table' AND name LIKE 'nb1%'"
 
         elif value == "Unlisted":
-            queryString = ""
+            queryString = "SELECT name FROM sqlite_master WHERE type ='table'"
 
         if value and queryString:
             dataList = []
@@ -249,8 +249,8 @@ class CellSetting(QWidget):
 
             self.db.close()
 
+            self.fcbElement.clear()
             if dataList:
-                self.fcbElement.clear()
                 self.fcbElement.addItems(dataList)
 
     def fcbElementOnChanged(self, value):
@@ -284,11 +284,11 @@ class CellSetting(QWidget):
         return value
 
     def submit(self):
-        # use object { "table": '', "value": '' }
+        # use object { "value": '', "table": '' }
         customElements = []
         if self.rbInformationElement.isChecked():
-            customElements.append(self.fcbElement.currentText())
             customElements.append(self.fcbValue.currentText())
+            customElements.append(self.fcbElement.currentText())
 
         elif self.rbEventCounter.isChecked():
             customElements.append("")
@@ -299,7 +299,11 @@ class CellSetting(QWidget):
             customElements.append(self.leText.text())
 
         if len(customElements) > 0:
-            result = ",".join(customElements)
+            if len(customElements) == 1:
+                result = ",".join(customElements)
+            else:
+                result = str(customElements)
+
             self.selected_item.setText(0, result)
 
         # self.previous_window.main_window.customData.append({"row":self.row, "column":self.column,"text":result})

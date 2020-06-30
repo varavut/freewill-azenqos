@@ -56,7 +56,12 @@ class TableWindow(QWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.generateMenu)
         self.properties_window = PropertiesWindow(
-            self, gc.azenqosDatabase, self.dataList, self.tableHeader
+            self,
+            gc.azenqosDatabase,
+            self.dataList,
+            self.tableHeader,
+            self.appliedSchema,
+            self.customData,
         )
 
     def setupUi(self):
@@ -478,7 +483,8 @@ class TableWindow(QWidget):
         item1 = menu.addAction(u"Customize")
         action = menu.exec_(self.mapToGlobal(pos))
         if action == item1:
-            self.properties_window.tempCustom = self.customData
+            self.properties_window.customData = self.customData
+            self.properties_window.customSchema = self.appliedSchema
             self.properties_window.tempHeader = self.customHeader
             self.properties_window.data_set = self.dataList
             self.properties_window.headers = self.tableHeader
@@ -670,6 +676,7 @@ class CustomizeQuery:
                 break
 
         key_func = lambda x: x["table"]
+        self.inputData = sorted(self.inputData, key=key_func)
         self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
 
         for tableIndex, schema in enumerate(self.groupedSchema):

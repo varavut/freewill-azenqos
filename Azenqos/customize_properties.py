@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtSql import QSqlQuery
 import sys
 import os
+import ast
 
 # Adding folder path
 sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
@@ -16,13 +17,23 @@ import globalutils
 
 
 class PropertiesWindow(QWidget):
-    def __init__(self, main_window=None, database=None, data_set=None, headers=None):
+    def __init__(
+        self,
+        main_window=None,
+        database=None,
+        data_set=None,
+        headers=None,
+        customSchema=None,
+        customData=None,
+    ):
         super().__init__(None)
 
         self.main_window = main_window
         self.db = database
         self.data_set = data_set
         self.headers = headers
+        self.customSchema = customSchema[:]
+        self.customData = customData[:]
 
         self.previousColumnLength = 1
         self.previousRowLength = 1
@@ -34,7 +45,6 @@ class PropertiesWindow(QWidget):
         self.parentCurrentSelect = None
         self.setupUi()
         self.setupComboBox()
-        self.tempCustom = []
         self.tempHeader = []
 
     def setupUi(self):
@@ -265,28 +275,63 @@ class PropertiesWindow(QWidget):
         self.cell_setting.show()
 
     def changeTreeWidgetItem(self, data, col):
+        item = None
+        isSchema = False
+
         if self.parentName == "Header":
             self.headers = self.getHeaders()
 
         else:
-            previousCustom = next(
+            try:
+                item = ast.literal_eval(data.text(col))
+                if len(item) == 2:
+                    isSchema = True
+            except:
+                item = data.text(col)
+
+            # Find and remove old text
+            previousCustomText = next(
                 (
                     x
-                    for x in self.tempCustom
+                    for x in self.customData
                     if x["row"] == self.currentRowSelect - 1
                     and x["column"] == self.currentColumnSelect - 1
                 ),
                 None,
             )
-            if previousCustom:
-                self.tempCustom.remove(previousCustom)
-            self.tempCustom.append(
-                {
-                    "row": self.currentRowSelect - 1,
-                    "column": self.currentColumnSelect - 1,
-                    "text": data.text(col),
-                }
+            if previousCustomText:
+                self.customData.remove(previousCustomText)
+
+            # Find and remove old schema
+            previousCustomSchema = next(
+                (
+                    x
+                    for x in self.customSchema
+                    if x["row"] == self.currentRowSelect - 1
+                    and x["column"] == self.currentColumnSelect - 1
+                ),
+                None,
             )
+            if previousCustomSchema:
+                self.customSchema.remove(previousCustomSchema)
+
+            if isSchema:
+                self.customSchema.append(
+                    {
+                        "row": self.currentRowSelect - 1,
+                        "column": self.currentColumnSelect - 1,
+                        "field": item[0],
+                        "table": item[1],
+                    }
+                )
+            else:
+                self.customData.append(
+                    {
+                        "row": self.currentRowSelect - 1,
+                        "column": self.currentColumnSelect - 1,
+                        "text": data.text(col),
+                    }
+                )
             self.data_set = self.getDataSet()
 
     def changeTreeWidget(self):
@@ -310,12 +355,36 @@ class PropertiesWindow(QWidget):
             columnlist = []
             rowItem = QTreeWidgetItem(self.treeWidget, [str("Row %i") % (row + 1)])
             for column in range(self.currentColumnLength):
-                try:
-                    column_name = str(self.data_set[row][column])
-                    if not column_name:
-                        column_name = '""'
-                except:
+                textItem = next(
+                    (
+                        x
+                        for x in self.customData
+                        if x["row"] == row and x["column"] == column
+                    ),
+                    None,
+                )
+                schemaItem = next(
+                    (
+                        x
+                        for x in self.customSchema
+                        if x["row"] == row and x["column"] == column
+                    ),
+                    None,
+                )
+
+                if textItem:
+                    column_name = textItem["text"]
+                elif schemaItem:
+                    column_name = str([schemaItem["field"], schemaItem["table"]])
+                else:
                     column_name = '""'
+
+                # try:
+                #     column_name = str(self.data_set[row][column])
+                #     if not column_name:
+                #         column_name = '""'
+                # except:
+                #     column_name = '""'
                 item = QTreeWidgetItem(rowItem, [column_name])
                 columnlist.append(column_name)
             rows.append(columnlist)
@@ -368,9 +437,9 @@ class PropertiesWindow(QWidget):
                     x = ""
             self.main_window.setHeader(headers)
 
-        data_set = self.getDataSet()
-        if data_set:
-            self.main_window.setDataSet(data_set)
+        # data_set = self.getDataSet()
+        # if data_set:
+        #     self.main_window.setDataSet(data_set)
 
         if self.cbRows.currentText() and self.cbColumns.currentText():
             tableSize = [
@@ -380,7 +449,9 @@ class PropertiesWindow(QWidget):
             self.main_window.setTableSize(tableSize)
             self.main_window.updateTable()
 
-        self.main_window.customData = self.tempCustom
+        self.main_window.customData = self.customData
+        self.main_window.appliedSchema = self.customSchema
+        self.main_window.queryFromSchema()
         self.close()
 
 
