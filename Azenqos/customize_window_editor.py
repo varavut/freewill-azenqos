@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtSql import *
 import json
 import globalutils
+import ast
 
 
 class CellSetting(QWidget):
@@ -116,7 +117,7 @@ class CellSetting(QWidget):
         self.leText = QLineEdit(self.CellContent)
         self.leText.setGeometry(QRect(10, 340, 211, 32))
         self.leText.setObjectName("leText")
-        self.leText.setText(self.selected_item.text(0))
+        # self.leText.setText(self.selected_item.text(0))
 
         self.tabWidget.addTab(self.CellContent, "")
 
@@ -144,6 +145,7 @@ class CellSetting(QWidget):
 
         # Prepare combo boxes
         self.prepareSystemTypes()
+        self.initializeEditorSelected()
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate
@@ -193,6 +195,26 @@ class CellSetting(QWidget):
         self.fcbValue.setDisabled(True)
         self.cbArgument.setDisabled(True)
         self.leText.setDisabled(True)
+
+    def initializeEditorSelected(self):
+        try:
+            item = ast.literal_eval(self.selected_item.text(0))
+            if len(item) == 2:
+                self.rbInformationElement.setChecked(True)
+                index = self.cbSystem.findText("Unlisted")
+                if index >= 0:
+                    self.cbSystem.setCurrentIndex(index)
+                    elementIndex = self.fcbElement.findText(item[1])
+                    if elementIndex >= 0:
+                        self.fcbElement.setCurrentIndex(elementIndex)
+                        valueIndex = self.fcbValue.findText(item[0])
+                        if valueIndex >= 0:
+                            self.fcbValue.setCurrentIndex(valueIndex)
+
+        except:
+            item = self.selected_item.text(0)
+            self.rbText.setChecked(True)
+            self.leText.setText(item)
 
     def prepareSystemTypes(self):
         self.cbSystem.clear()
