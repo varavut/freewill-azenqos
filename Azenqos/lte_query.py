@@ -252,6 +252,20 @@ class LteDataQuery:
                 "column": ["lte_serv_cell_info_ul_bandwidth_mhz"],
                 "table": "lte_serv_cell_info",
             },
+            {
+                "name": "SCC DL Bandwidth (Mhz)",
+                "column": ["lte_scc_dl_bandwidth_1"],
+                "table": "lte_serv_cell_info",
+            },
+            {"name": "SIB1 info:", "column": [], "table": "lte_serv_cell_info",},
+            {"name": "sib1 MCC", "column": ["lte_sib1_mcc"], "table": "lte_sib1_info",},
+            {"name": "sib1 MNC", "column": ["lte_sib1_mnc"], "table": "lte_sib1_info",},
+            {
+                "name": "sib1 TAC",
+                "column": ["lte_sib1_tac"],
+                "table": "lte_sib1_info",
+                "shiftRight": 1,
+            },
         ]
 
         fieldsList = [
@@ -279,11 +293,11 @@ class LteDataQuery:
             # "UL EARFCN",
             # "DL Bandwidth (Mhz)",
             # "UL Bandwidth (Mhz)",
-            "SCC DL Bandwidth (Mhz)",
-            "SIB1 info:",
-            "sib1 MCC",
-            "sib1 MNC",
-            "sib1 TAC",
+            # "SCC DL Bandwidth (Mhz)",
+            # "SIB1 info:",
+            # "sib1 MCC",
+            # "sib1 MNC",
+            # "sib1 TAC",
             "sib1 ECI",
             "sib1 eNBid",
             "sib1 LCI",

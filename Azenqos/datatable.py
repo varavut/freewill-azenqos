@@ -445,12 +445,15 @@ class TableWindow(QWidget):
             rowTitle = {"row": row, "column": 0, "text": element["name"]}
             self.customData.append(rowTitle)
             for column, item in enumerate(element["column"]):
+                shiftRight = 0
+                if "shiftRight" in element:
+                    shiftRight = element["shiftRight"]
                 activeSchema.append(
                     {
                         "table": element["table"],
                         "field": item,
                         "row": row,
-                        "column": column + 1,
+                        "column": column + 1 + shiftRight,
                     }
                 )
 
