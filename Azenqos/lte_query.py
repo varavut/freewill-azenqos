@@ -9,13 +9,8 @@ class LteDataQuery:
             self.timeFilter = currentDateTimeString
 
     def getRadioParameters(self):
-        self.openConnection()
-        dataList = []
-        condition = ""
+
         # add Time for first row
-        if self.timeFilter:
-            dataList.append(["Time", self.timeFilter, "", ""])
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
         elementDictList = [
             {"name": "Time", "column": ["global_time"], "table": "global_time",},
             {
@@ -260,263 +255,193 @@ class LteDataQuery:
             {"name": "SIB1 info:", "column": [], "table": "lte_serv_cell_info",},
             {"name": "sib1 MCC", "column": ["lte_sib1_mcc"], "table": "lte_sib1_info",},
             {"name": "sib1 MNC", "column": ["lte_sib1_mnc"], "table": "lte_sib1_info",},
+            {"name": "sib1 TAC", "column": ["lte_sib1_tac"], "table": "lte_sib1_info",},
+            {"name": "sib1 ECI", "column": ["lte_sib1_eci"], "table": "lte_sib1_info",},
             {
-                "name": "sib1 TAC",
-                "column": ["lte_sib1_tac"],
+                "name": "sib1 eNBid",
+                "column": ["lte_sib1_enb_id"],
                 "table": "lte_sib1_info",
-                "shiftRight": 1,
+            },
+            {
+                "name": "sib1 LCI",
+                "column": ["lte_sib1_local_cell_id"],
+                "table": "lte_sib1_info",
+            },
+            {"name": "TDD Config:", "column": [], "table": "lte_sib1_info",},
+            {
+                "name": "SubframeAssignment",
+                "column": ["lte_tdd_config_subframe_assignment"],
+                "table": "lte_tdd_config",
+            },
+            {
+                "name": "SpclSubframePattern",
+                "column": ["lte_tdd_config_special_subframe_pattern"],
+                "table": "lte_tdd_config",
+            },
+            {
+                "name": "DedBearer QCI",
+                "column": ["lte_ded_eps_bearer_qci"],
+                "table": "activate_dedicated_eps_bearer_context_request_params",
             },
         ]
 
-        fieldsList = [
-            # "Tx Power",
-            # "PUCCH TxPower (dBm)",
-            # "PUSCH TxPower (dBm)",
-            # "TimingAdvance",
-            # "Transmission Mode (RRC-tm)",
-            # "LTE RRC State",
-            # "LTE EMM State",
-            # "LTE RRC Substate",
-            # "Modern ServCellInfo",
-            # "Allowed Access",
-            # "MCC",
-            # "MNC",
-            # "TAC",
-            # "Cell ID (ECI)",
-            # "eNodeB ID",
-            # "LCI",
-            # "PCI",
-            # "Derived SCC ECI",
-            # "Derived SCC eNodeB ID",
-            # "Derived SCC LCI",
-            # "DL EARFCN",
-            # "UL EARFCN",
-            # "DL Bandwidth (Mhz)",
-            # "UL Bandwidth (Mhz)",
-            # "SCC DL Bandwidth (Mhz)",
-            # "SIB1 info:",
-            # "sib1 MCC",
-            # "sib1 MNC",
-            # "sib1 TAC",
-            "sib1 ECI",
-            "sib1 eNBid",
-            "sib1 LCI",
-            "TDD Config:",
-            "SubframeAssignment",
-            "SpclSubframePattern",
-            "DedBearer QCI",
-        ]
-
-        queryString = """SELECT ltp.lte_tx_power AS 'Tx Power', lpcti.lte_pucch_tx_power AS 'PUCCH TxPower (dBm)', lpsti.lte_pusch_tx_power AS 'PUSCH TxPower (dBm)',
-                                lft.lte_ta AS 'TimingAdvance', lrti.lte_transmission_mode_l3 AS 'Transmission Mode (RRC-tm)', lrs.lte_rrc_state AS 'LTE RRC State',
-                                les.lte_emm_state AS 'LTE EMM State', les.lte_emm_substate AS 'LTE EMM Substate', '____' AS 'Modem ServCellInfo',
-                                lsci.lte_serv_cell_info_allowed_access AS 'Allowed Access', lsci.lte_serv_cell_info_mcc AS 'MCC', lsci.lte_serv_cell_info_mnc AS 'MNC',
-                                lsci.lte_serv_cell_info_tac AS 'TAC', lsci.lte_serv_cell_info_eci AS 'Cell ID (ECI)', lsci.lte_serv_cell_info_enb_id AS 'eNodeB ID', lsci.lte_scc_derived_lci AS 'LCI',
-                                lsci.lte_serv_cell_info_pci AS 'PCI', lsci.lte_scc_derived_eci AS 'Derviced SCC ECI', lsci.lte_scc_derived_enb_id AS 'Derived SCC eNodeB ID',
-                                lsci.lte_scc_derived_lci AS 'Derived SCC LCI', lsci.lte_serv_cell_info_dl_freq AS 'DL EARFCN', lsci.lte_serv_cell_info_ul_freq AS 'UL EARFCN',
-                                lsci.lte_serv_cell_info_dl_bandwidth_mhz AS 'DL Bandwidth (Mhz)', lsci.lte_serv_cell_info_ul_bandwidth_mhz AS 'UL Bandwidth (Mhz)', lsci.lte_scc_dl_bandwidth_1 AS 'SCC DL Bandwidth (Mhz)',
-                                '____' AS 'SIB1 info:', lsoi.lte_sib1_mcc AS 'sib1 MCC', lsoi.lte_sib1_mnc AS 'sib1 MNC', lsoi.lte_sib1_tac AS 'sib1 TAC', lsoi.lte_sib1_eci AS 'sib ECI',
-                                lsoi.lte_sib1_enb_id AS 'sib1 eNBid', lsoi.lte_sib1_local_cell_id AS 'sib1 LCI', '____' AS 'TDD Config:', ltc.lte_tdd_config_subframe_assignment AS 'SubframeAssignment',
-                                ltc.lte_tdd_config_special_subframe_pattern AS 'SpclSubframePattern', ad.lte_ded_eps_bearer_qci AS 'DedBearer QCI'
-                        FROM (SELECT lte_tx_power FROM lte_tx_power WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS ltp,
-                        (SELECT * FROM lte_serv_cell_info WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lsci,
-                        (SELECT lte_pucch_tx_power FROM lte_pucch_tx_info WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lpcti,
-                        (SELECT lte_pusch_tx_power FROM lte_pusch_tx_info WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lpsti,
-                        (SELECT lte_ta FROM lte_frame_timing WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lft,
-                        (SELECT lte_transmission_mode_l3 FROM lte_rrc_transmode_info WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lrti,
-                        (SELECT lte_rrc_state FROM lte_rrc_state WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lrs,
-                        (SELECT lte_emm_state, lte_emm_substate FROM lte_emm_state WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS les,
-                        (SELECT * FROM lte_sib1_info WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS lsoi,
-                        (SELECT lte_tdd_config_subframe_assignment, lte_tdd_config_special_subframe_pattern FROM lte_tdd_config WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS ltc,
-                        (SELECT lte_ded_eps_bearer_qci FROM activate_dedicated_eps_bearer_context_request_params WHERE time <= '%s'  ORDER BY time DESC LIMIT 1) AS ad""" % (
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-            self.timeFilter,
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        if query.first():
-            for index in range(len(fieldsList)):
-                columnName = fieldsList[index]
-                value = ""
-                try:
-                    value = query.value(index)
-                except:
-                    value = ""
-                dataList.append([columnName, value, "", ""])
-        else:
-            for index in range(len(fieldsList)):
-                columnName = fieldsList[index]
-                value = ""
-                dataList.append([columnName, value, "", ""])
-        self.closeConnection()
         return elementDictList
 
     def getServingAndNeighbors(self):
-        self.openConnection()
         MAX_NEIGHBORS = 16
-        dataList = []
-        typeHeader = {
-            "serving": ["dateString", "Serving cell:", "", "", "", ""],
-            "neigh": ["", "Neighbor cells:", "", "", "", ""],
-        }
-        emptyRow = ["", "", "", "", "", ""]
-        condition = ""
+        elementDictList = [
+            {
+                "tableRow": 0,
+                "tableCol": 0,
+                "column": ["global_time"],
+                "table": "global_time",
+            },
+            {"name": "Serving Cell:", "column": [], "table": "", "shiftRight": 1},
+            {"name": "", "column": ["lte_earfcn_1"], "table": "lte_cell_meas",},
+            {
+                "tableRow": 1,
+                "tableCol": 2,
+                "column": ["lte_serv_cell_info_band"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 3,
+                "column": ["lte_serv_cell_info_pci"],
+                "table": "lte_serv_cell_info",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 4,
+                "column": ["lte_inst_rsrp_1"],
+                "table": "lte_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 5,
+                "column": ["lte_inst_rsrq_1"],
+                "table": "lte_cell_meas",
+            },
+            {"name": "Neightbor Cells:", "column": [], "table": "", "shiftRight": 1},
+        ]
 
-        # Set query condition for serving cell
-        if self.timeFilter:
-            condition = "WHERE lcm.time <= '%s'" % (self.timeFilter)
-
-        typeHeader["serving"][0] = self.timeFilter
-        dataList.append(typeHeader["serving"])
-
-        # queryString = """SELECT lcm.lte_earfcn_1, lsci.lte_serv_cell_info_band, lsci.lte_serv_cell_info_pci, lcm.lte_inst_rsrp_1,
-        #                 lcm.lte_inst_rsrq_1
-        #                 FROM lte_cell_meas AS lcm
-        #                 LEFT JOIN lte_serv_cell_info lsci ON lcm.time = lsci.time
-        #                 %s
-        #                 ORDER BY lcm.time DESC
-        #                 LIMIT 1""" % (
-        #     condition
-        # )
-        queryString = """SELECT lcm.lte_earfcn_1, lsci.lte_serv_cell_info_band, lsci.lte_serv_cell_info_pci, lcm.lte_inst_rsrp_1,lcm.lte_inst_rsrq_1
-                        FROM (SELECT lte_earfcn_1, lte_inst_rsrp_1, lte_inst_rsrq_1 FROM lte_cell_meas WHERE time <= '%s' ORDER BY time DESC LIMIT 1) lcm,
-                        (SELECT lte_serv_cell_info_band,lte_serv_cell_info_pci FROM lte_serv_cell_info WHERE time <= '%s' ORDER BY time DESC LIMIT 1) lsci""" % (
-            self.timeFilter,
-            self.timeFilter,
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        if query.first():
-            servingCell = [
-                "",
-                query.value(0) or "",
-                query.value(1) or "",
-                query.value(2) or "",
-                query.value(3) or "",
-                query.value(4) or "",
+        for n in range(MAX_NEIGHBORS):
+            i = n + 1
+            neighborRow = [
+                {
+                    "name": "#%d" % i,
+                    "column": [
+                        "lte_neigh_earfcn_%d" % i,
+                        "lte_neigh_band_%d" % i,
+                        "lte_neigh_physical_cell_id_%d" % i,
+                        "lte_neigh_rsrp_%d" % i,
+                        "lte_neigh_rsrq_%d" % i,
+                    ],
+                    "table": "lte_neigh_meas",
+                },
             ]
-            dataList.append(servingCell)
+            elementDictList += neighborRow
 
-        # Set query condition for neigh cell
-        if self.timeFilter:
-            condition = "WHERE lnm.time <= '%s'" % (self.timeFilter)
-
-        for neighbor in range(1, MAX_NEIGHBORS):
-            neighborNo = neighbor + 1
-            queryString = """SELECT lnm.lte_neigh_earfcn_%d, lnm.lte_neigh_band_%d, lnm.lte_neigh_physical_cell_id_%d, lnm.lte_neigh_rsrp_%d,
-                            lnm.lte_neigh_rsrq_%d
-                            FROM lte_neigh_meas AS lnm
-                            %s
-                            ORDER BY lnm.time DESC
-                            LIMIT 1""" % (
-                neighborNo,
-                neighborNo,
-                neighborNo,
-                neighborNo,
-                neighborNo,
-                condition,
-            )
-            query = QSqlQuery()
-            query.exec_(queryString)
-            if query.first():
-                if query.value(0):
-                    if neighborNo == 1:
-                        dataList.append(typeHeader["neigh"])
-                    neighCell = [
-                        "",
-                        query.value(0),
-                        query.value(1),
-                        query.value(2),
-                        query.value(3),
-                        query.value(4),
-                    ]
-                    dataList.append(neighCell)
-                else:
-                    break
-        self.closeConnection()
-        return dataList
+        return elementDictList
 
     def getPucchPdschParameters(self):
-        self.openConnection()
-
-        dataList = []
-        condition = ""
-        maxBearers = 8
-        pucchFields = [
-            "---- PUCCH ----",
-            "CQI CW 0",
-            "CQI CW 1",
-            "CQI N Sub-bands",
-            "Rank Indicator",
+        elementDictList = [
+            {"name": "---- PUCCH ----", "column": [], "table": ""},
+            {"name": "CQI CW 0", "column": ["lte_cqi_cw0_1"], "table": "lte_cqi"},
+            {"name": "CQI CW 1", "column": ["lte_cqi_cw1_1"], "table": "lte_cqi"},
+            {
+                "name": "CQI N Sub-bands",
+                "column": ["lte_cqi_n_subbands_1"],
+                "table": "lte_cqi",
+            },
+            {
+                "name": "Rank Indicator",
+                "column": ["lte_rank_indication_1"],
+                "table": "lte_cqi",
+            },
+            {"name": "---- PDSCH ----", "column": [], "table": ""},
+            {
+                "name": "PDSCH Serving Cell ID",
+                "column": ["lte_pdsch_serving_cell_id_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH RNTI ID",
+                "column": ["lte_pdsch_rnti_id_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH RNTI Type",
+                "column": ["lte_pdsch_rnti_type_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Serving N Tx Antennas",
+                "column": ["lte_pdsch_serving_n_tx_antennas_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Serving N Rx Antennas",
+                "column": ["lte_pdsch_serving_n_rx_antennas_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Transmission Mode Current",
+                "column": ["lte_pdsch_transmission_mode_current_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Spatial Rank",
+                "column": ["lte_pdsch_spatial_rank_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Rb Allocation Slot 0",
+                "column": ["lte_pdsch_rb_allocation_slot0_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Rb Allocation Slot 1",
+                "column": ["lte_pdsch_rb_allocation_slot1_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH PMI Type",
+                "column": ["lte_pdsch_pmi_type_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH PMI Index",
+                "column": ["lte_pdsch_pmi_index_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Stream[0] Block Size",
+                "column": ["lte_pdsch_stream0_transport_block_size_bits_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Stream[0] Modulation",
+                "column": ["lte_pdsch_stream0_modulation_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Traffic To Pilot Ratio",
+                "column": ["lte_pdsch_traffic_to_pilot_ratio_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Stream[1] Block Size",
+                "column": ["lte_pdsch_stream1_transport_block_size_bits_1"],
+                "table": "lte_pdsch_meas",
+            },
+            {
+                "name": "PDSCH Stream[1] Modulation",
+                "column": ["lte_pdsch_stream1_modulation_1"],
+                "table": "lte_pdsch_meas",
+            },
         ]
-        pdschFields = [
-            "---- PDSCH ----",
-            "PDSCH Serving Cell ID",
-            "PDSCH RNTI ID",
-            "PDSCH RNTI Type",
-            "PDSCH Serving N Tx Antennas",
-            "PDSCH Serving N Rx Antennas",
-            "PDSCH Transmission Mode Current",
-            "PDSCH Spatial Rank",
-            "PDSCH Rb Allocation Slot 0",
-            "PDSCH Rb Allocation Slot 1",
-            "PDSCH PMI Type",
-            "PDSCH PMI Index",
-            "PDSCH Stream[0] Block Size",
-            "PDSCH Stream[0] Modulation",
-            "PDSCH Traffic To Pilot Ratio",
-            "PDSCH Stream[1] Block Size",
-            "PDSCH Stream[1] Modulation",
-        ]
-
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-            dateString = "%s" % (self.timeFilter)
-
-        dataList.append(["Time", self.timeFilter])
-
-        queryString = """SELECT '' AS header, lte_cqi_cw0_1, lte_cqi_cw1_1, lte_cqi_n_subbands_1, lte_rank_indication_1
-                        FROM lte_cqi
-                        %s
-                        ORDER BY time DESC
-                        LIMIT 1""" % (
-            condition
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        if query.first():
-            for field in range(len(pucchFields)):
-                dataList.append([pucchFields[field], query.value(field) or ""])
-
-        queryString = """SELECT '' AS pdsch, lte_pdsch_serving_cell_id_1, lte_pdsch_rnti_id_1, lte_pdsch_rnti_type_1,
-                        lte_pdsch_serving_n_tx_antennas_1, lte_pdsch_serving_n_rx_antennas_1,
-                        lte_pdsch_transmission_mode_current_1, lte_pdsch_spatial_rank_1,
-                        lte_pdsch_rb_allocation_slot0_1, lte_pdsch_rb_allocation_slot1_1,
-                        lte_pdsch_pmi_type_1, lte_pdsch_pmi_index_1,lte_pdsch_stream0_transport_block_size_bits_1,
-                        lte_pdsch_stream0_modulation_1, lte_pdsch_traffic_to_pilot_ratio_1,lte_pdsch_stream1_transport_block_size_bits_1,
-                        lte_pdsch_stream1_modulation_1
-                        FROM lte_pdsch_meas
-                        %s
-                        ORDER BY time DESC
-                        LIMIT 1""" % (
-            condition
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        if query.first():
-            for field in range(len(pdschFields)):
-                dataList.append([pdschFields[field], query.value(field) or ""])
-        self.closeConnection()
-        return dataList
+        return elementDictList
 
     def getRlc(self):
         self.openConnection()

@@ -373,6 +373,8 @@ class PropertiesWindow(QWidget):
                 )
 
                 if textItem:
+                    if textItem["text"] == "":
+                        textItem["text"] = '""'
                     column_name = textItem["text"]
                 elif schemaItem:
                     column_name = str([schemaItem["field"], schemaItem["table"]])

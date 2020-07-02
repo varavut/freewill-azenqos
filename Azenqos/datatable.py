@@ -295,14 +295,18 @@ class TableWindow(QWidget):
                 )
             elif self.title == "LTE_Serving + Neighbors":
                 self.tableHeader = ["Time", "EARFCN", "Band", "PCI", "RSRP", "RSRQ"]
-                self.dataList = LteDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getServingAndNeighbors()
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getServingAndNeighbors()
+                )
             elif self.title == "LTE_PUCCH/PDSCH Parameters":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = LteDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getPucchPdschParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getPucchPdschParameters()
+                )
             elif self.title == "LTE_LTE Line Chart":
                 self.tableHeader = ["Element", "Value", "MS", "Color"]
             elif self.title == "LTE_LTE RLC":
@@ -439,23 +443,42 @@ class TableWindow(QWidget):
     def initializeQuerySchema(self, elementDict):
         # [table,value,row,column]
         activeSchema = []
+        extraRow = 0
+        filteredRow = list(filter(lambda elem: "name" in elem, elementDict))
         self.columns = len(self.tableHeader)
-        self.rows = len(elementDict)
+        self.rows = len(filteredRow)
         for row, element in enumerate(elementDict):
-            rowTitle = {"row": row, "column": 0, "text": element["name"]}
-            self.customData.append(rowTitle)
-            for column, item in enumerate(element["column"]):
-                shiftRight = 0
-                if "shiftRight" in element:
-                    shiftRight = element["shiftRight"]
+            if "tableRow" in element and "tableCol" in element:
                 activeSchema.append(
                     {
                         "table": element["table"],
-                        "field": item,
-                        "row": row,
-                        "column": column + 1 + shiftRight,
+                        "field": element["column"][0],
+                        "row": element["tableRow"],
+                        "column": element["tableCol"],
                     }
                 )
+                extraRow += 1
+
+            else:
+                shiftRight = 0
+                if "shiftRight" in element:
+                    shiftRight = element["shiftRight"]
+                rowTitle = {
+                    "row": row - extraRow,
+                    "column": 0 + shiftRight,
+                    "text": element["name"],
+                }
+                self.customData.append(rowTitle)
+
+                for column, item in enumerate(element["column"]):
+                    activeSchema.append(
+                        {
+                            "table": element["table"],
+                            "field": item,
+                            "row": row - extraRow,
+                            "column": column + 1 + shiftRight,
+                        }
+                    )
 
         return activeSchema
 
@@ -541,9 +564,12 @@ class TableWindow(QWidget):
             if not columnIndex == -1:
                 timeItem = item.siblingAtColumn(columnIndex)
                 cellContent = str(timeItem.data())
-                timeCell = datetime.datetime.strptime(
-                    str(cellContent), "%Y-%m-%d %H:%M:%S.%f"
-                ).timestamp()
+                try:
+                    timeCell = datetime.datetime.strptime(
+                        str(cellContent), "%Y-%m-%d %H:%M:%S.%f"
+                    ).timestamp()
+                except:
+                    timeCell = None
             else:
                 timeCell = timeCell
         finally:
@@ -665,7 +691,21 @@ class CustomizeQuery:
         self.queryString = []
         self.queryTable = []
 
+    def split(self, arr, size):
+        arrs = []
+        while len(arr) > size:
+            pice = arr[:size]
+            arrs.append(pice)
+            arr = arr[size:]
+        arrs.append(arr)
+        return arrs
+
     def query(self):
+        MAX_INGROUP = 64
+        self.allSelectedColumns = []
+        self.queryString = []
+        self.queryTable = []
+        uniqueTables = []
         condition = ""
         result = []
         # inputdata = ['table','field','row',column']
@@ -682,33 +722,55 @@ class CustomizeQuery:
         self.inputData = sorted(self.inputData, key=key_func)
         self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
 
+        for group in self.groupedSchema:
+            if len(group) > MAX_INGROUP:
+                oldIndex = self.groupedSchema.index(group)
+                tempGroups = self.split(group, MAX_INGROUP)
+                self.groupedSchema.remove(group)
+                for newIndex, newGroup in enumerate(tempGroups):
+                    self.groupedSchema.insert(newIndex + oldIndex, newGroup)
+        pass
+
         for tableIndex, schema in enumerate(self.groupedSchema):
 
             if self.globalTime:
                 condition = "WHERE time <= '%s'" % (self.globalTime)
 
             selectedColumns = []
+            uniqueColumns = []
+            thirdLvSub = []
             tableData = None
-            for data in schema:
+            for uniqueCol, data in enumerate(schema):
                 if len(data["field"]) > 0:
                     selectedColumns.append(data["field"])
+                    uniqueColumns.append(data["field"] + "_%d" % uniqueCol)
                     if not tableData:
                         tableData = data["table"]
                         self.queryTable.append(tableData)
+                        uniqueTables.append(tableData + "_%d" % tableIndex)
                 else:
                     schema.remove(data)
                     continue
-            self.allSelectedColumns += selectedColumns
-            selectedColumns = ",".join(selectedColumns)
-            queryString = (
-                "( SELECT %s,1 as row_num FROM %s %s ORDER BY time DESC LIMIT 1 ) %s "
-                % (selectedColumns, tableData, condition, tableData)
+            self.allSelectedColumns += uniqueColumns
+
+            for indexCol, col in enumerate(selectedColumns):
+                innerSubQuery = (
+                    "(SELECT IFNULL(( SELECT %s FROM %s %s ORDER BY time DESC LIMIT 1),NULL) AS %s) "
+                    % (col, tableData, condition, uniqueColumns[indexCol])
+                )
+                thirdLvSub.append(innerSubQuery)
+
+            uniqueColumns = ",".join(uniqueColumns)
+            queryString = "( SELECT %s,1 as row_num FROM %s LIMIT 1 ) %s " % (
+                uniqueColumns,
+                ",".join(thirdLvSub),
+                uniqueTables[tableIndex],
             )
             if not tableIndex == 0:
                 queryString = "JOIN %s ON %s.row_num=%s.row_num " % (
                     queryString,
-                    self.queryTable[tableIndex - 1],
-                    self.queryTable[tableIndex],
+                    uniqueTables[tableIndex - 1],
+                    uniqueTables[tableIndex],
                 )
 
             self.queryString.append(queryString)
@@ -722,6 +784,7 @@ class CustomizeQuery:
 
         query = QSqlQuery()
         query.exec_(queryAll)
+        field_key = lambda x: x["field"]
         if query.first():
             for i in range(len(self.inputData)):
                 output = [
