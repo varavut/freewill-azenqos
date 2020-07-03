@@ -335,19 +335,25 @@ class TableWindow(QWidget):
             # CDMA/EVDO
             elif self.title == "CDMA/EVDO_Radio Parameters":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = CdmaEvdoQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRadioParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    CdmaEvdoQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRadioParameters()
+                )
             elif self.title == "CDMA/EVDO_Serving + Neighbors":
                 self.tableHeader = ["Time", "PN", "Ec/Io", "Type"]
-                self.dataList = CdmaEvdoQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getServingAndNeighbors()
+                self.appliedSchema = self.initializeQuerySchema(
+                    CdmaEvdoQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getServingAndNeighbors()
+                )
             elif self.title == "CDMA/EVDO_EVDO Parameters":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = CdmaEvdoQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getEvdoParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    CdmaEvdoQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getEvdoParameters()
+                )
 
             # Data
             elif self.title == "Data_GSM Data Line Chart":
