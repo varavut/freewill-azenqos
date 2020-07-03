@@ -173,9 +173,11 @@ class TableWindow(QWidget):
             # GSM
             if self.title == "GSM_Radio Parameters":
                 self.tableHeader = ["Element", "Full", "Sub"]
-                self.dataList = GsmDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRadioParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    GsmDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRadioParameters()
+                )
                 # self.dataList = GsmDataQuery(None).getRadioParameters()
             elif self.title == "GSM_Serving + Neighbors":
                 self.tableHeader = [
@@ -190,19 +192,25 @@ class TableWindow(QWidget):
                     "C31",
                     "C32",
                 ]
-                self.dataList = GsmDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getServingAndNeighbors()
+                self.appliedSchema = self.initializeQuerySchema(
+                    GsmDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getServingAndNeighbors()
+                )
             elif self.title == "GSM_Current Channel":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = GsmDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getCurrentChannel()
+                self.appliedSchema = self.initializeQuerySchema(
+                    GsmDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getCurrentChannel()
+                )
             elif self.title == "GSM_C/I":
                 self.tableHeader = ["Time", "ARFCN", "Value"]
-                self.dataList = GsmDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getCSlashI()
+                self.appliedSchema = self.initializeQuerySchema(
+                    GsmDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getCSlashI()
+                )
             # TODO: find the way to find event counter
             # elif self.title == "GSM_Events Counter":
             #     self.tableHeader = ["Event", "MS1", "MS2", "MS3", "MS4"]

@@ -9,350 +9,235 @@ class GsmDataQuery:
             self.timeFilter = currentDateTimeString
 
     def getRadioParameters(self):
-        self.openConnection()
-        dataList = []
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-            dataList.append(["Time", self.timeFilter, ""])
-        gcmFieldList = ["RxLev", "RxQual"]
-        gcmQueryString = (
-            """SELECT gsm_rxlev_full_dbm || ' ' || gsm_rxlev_sub_dbm as "RxLev", gsm_rxqual_full || ' ' || gsm_rxqual_sub as "RxQual" FROM gsm_cell_meas %s ORDER BY time DESC LIMIT 1"""
-            % (condition)
-        )
-        gcmQuery = QSqlQuery()
-        queryStatus = gcmQuery.exec_(gcmQueryString)
-        if queryStatus:
-            hasData = gcmQuery.first()
-            if hasData:
-                for field in gcmFieldList:
-                    fullValue = ""
-                    subValue = ""
-                    if field in ["RxLev", "RxQual"]:
-                        if gcmQuery.value(field):
-                            splitValue = gcmQuery.value(field).split(" ")
-                            fullValue = splitValue[0] or ""
-                            subValue = splitValue[1] or ""
-                    dataList.append([field, fullValue, subValue])
-            else:
-                for field in gcmFieldList:
-                    fullValue = ""
-                    subValue = ""
-                    dataList.append([field, fullValue, subValue])
-
         elementDictList = [
-            {"element": "TA", "table": "gsm_tx_meas", "column": 'gsm_ta as "TA"'},
+            {"name": "Time", "column": ["global_time"], "table": "global_time",},
             {
-                "element": "RLT (Max)",
+                "name": "RxLev",
+                "column": ["gsm_rxlev_full_dbm", "gsm_rxlev_sub_dbm"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "name": "RxQual",
+                "column": ["gsm_rxqual_full", "gsm_rxqual_sub"],
+                "table": "gsm_cell_meas",
+            },
+            {"name": "TA", "column": ["gsm_ta"], "table": "gsm_tx_meas",},
+            {
+                "name": "RLT (Max)",
+                "column": ["gsm_radiolinktimeout_max"],
                 "table": "gsm_rl_timeout_counter",
-                "column": 'gsm_radiolinktimeout_max as "RLT (Max)"',
             },
             {
-                "element": "RLT (Current)",
+                "name": "RLT (Current)",
+                "column": ["gsm_radiolinktimeout_current"],
                 "table": "gsm_rlt_counter",
-                "column": 'gsm_radiolinktimeout_current as "RLT (Current)"',
             },
             {
-                "element": "DTX Used",
+                "name": "DTX Used",
+                "column": ["gsm_dtxused"],
                 "table": "gsm_rr_measrep_params",
-                "column": 'gsm_dtxused as "DTX Used"',
             },
-            {
-                "element": "TxPower",
-                "table": "gsm_tx_meas",
-                "column": 'gsm_txpower as "TxPower"',
-            },
-            {"element": "FER", "table": "vocoder_info", "column": 'gsm_fer as "FER"'},
+            {"name": "TxPower", "column": ["gsm_txpower"], "table": "gsm_tx_meas",},
+            {"name": "FER", "column": ["gsm_fer"], "table": "vocoder_info",},
         ]
-        for dic in elementDictList:
-            element = dic["element"]
-            column = dic["column"]
-            table = dic["table"]
-            if element and column and table:
-                queryString = """SELECT %s
-                                FROM %s
-                                %s
-                                ORDER BY time DESC
-                                LIMIT 1""" % (
-                    column,
-                    table,
-                    condition,
-                )
-                query = QSqlQuery()
-                queryStatus = query.exec_(queryString)
-                if queryStatus:
-                    hasData = query.first()
-                    value = ""
-                    if query.value(element):
-                        value = query.value(element)
-                    dataList.append([element, value, ""])
-        self.closeConnection()
-        return dataList
+        return elementDictList
 
     def getServingAndNeighbors(self):
-        self.openConnection()
-        dataList = []
-        fieldsList = [
-            "Cellname",
-            "LAC",
-            "BSIC",
-            "ARFCN",
-            "RxLev",
-            "C1",
-            "C2",
-            "C31",
-            "C32",
-        ]
-        selectedColumns = " gsm_cellfile_matched_cellname, gsm_lac, gsm_bsic, gsm_arfcn_bcch, gsm_rxlev_full_dbm, gsm_c1, gsm_c2, gsm_c31, gsm_c32"
-        condition = ""
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-        dataList.append([self.timeFilter, "", "", "", "", "", "", "", "", ""])
-        temp = []
-        queryString = None
+        MAX_NEIGHBORS = 32
         elementDictList = [
             {
-                "element": "Cellname",
-                "name": "gcm",
-                "table": "gsm_cell_meas",
-                "column": "gsm_cellfile_matched_cellname",
-                "join": [
-                    {
-                        "element": "LAC",
-                        "name": "gsci",
-                        "table": "gsm_serv_cell_info",
-                        "column": "gsm_lac ",
-                    },
-                    {
-                        "element": "BSIC,ARFCN,RxLev,C1,C2,C31,C32",
-                        "name": "gcm2",
-                        "table": "gsm_cell_meas",
-                        "column": "gsm_bsic, gsm_arfcn_bcch, gsm_rxlev_full_dbm, gsm_c1, gsm_c2, gsm_c31, gsm_c32 ",
-                    },
-                ],
-            }
-        ]
-
-        for dic in elementDictList:
-            temp = []
-            name = dic["name"]
-            element = dic["element"]
-            mainElement = dic["element"]
-            mainColumn = dic["column"]
-            subColumn = dic["column"]
-            table = dic["table"]
-            join = None
-            joinString = ""
-            onString = ""
-            if not len(dic["join"]) == 0:
-                for join in dic["join"]:
-                    onString = """ON %s.row_num = %s.row_num""" % (name, join["name"],)
-                    joinString += """LEFT JOIN ( SELECT %s,1 as row_num 
-                                            FROM %s 
-                                            %s 
-                                            ORDER BY time DESC 
-                                            LIMIT 1 
-                                        ) %s
-                                        %s """ % (
-                        join["column"],
-                        join["table"],
-                        condition,
-                        join["name"],
-                        onString,
-                    )
-
-                    mainColumn += ",%s" % join["column"]
-                    mainElement += ",%s" % join["element"]
-
-            if element and mainColumn and table:
-                queryString = """SELECT %s
-                                FROM ( SELECT %s,1 as row_num
-                                        FROM %s 
-                                        %s 
-                                        ORDER BY time DESC 
-                                        LIMIT 1 
-                                    ) %s
-                                %s 
-                                """ % (
-                    mainColumn,
-                    subColumn,
-                    table,
-                    condition,
-                    name,
-                    joinString,
-                )
-                query = QSqlQuery()
-                query.exec_(queryString)
-                elements = mainElement.split(",")
-                if query.first():
-                    for i in range(0, len(elements)):
-                        temp.append(
-                            "" if str(query.value(i)) == "NULL" else query.value(i)
-                        )
-                else:
-                    for elem in elements:
-                        temp.append("")
-            if not all(v == "" for v in temp):
-                temp.insert(0, "")
-                dataList.append(temp)
-        self.closeConnection()
-        return dataList
-
-    def getCurrentChannel(self):
-        self.openConnection()
-
-        dataList = []
-        condition = ""
-        gsmFields = [
+                "tableRow": 0,
+                "tableCol": 0,
+                "column": ["global_time"],
+                "table": "global_time",
+            },
+            {"name": "Serving Cell:", "column": [], "table": "", "shiftRight": 1},
             {
-                "element": "Cellname",
-                "column": 'gsm_cellfile_matched_cellname as "Cellname"',
+                "name": "",
+                "column": ["gsm_cellfile_matched_cellname"],
                 "table": "gsm_cell_meas",
             },
-            {"element": "CGI", "column": 'gsm_cgi as "CGI"', "table": "gsm_cell_meas"},
             {
-                "element": "Channel type",
-                "column": 'gsm_channeltype as "Channel type"',
+                "tableRow": 1,
+                "tableCol": 2,
+                "column": ["gsm_lac"],
+                "table": "gsm_serv_cell_info",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 3,
+                "column": ["gsm_bsic"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 4,
+                "column": ["gsm_arfcn_bcch"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 5,
+                "column": ["gsm_rxlev_full_dbm"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 6,
+                "column": ["gsm_c1"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 7,
+                "column": ["gsm_c2"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 8,
+                "column": ["gsm_c31"],
+                "table": "gsm_cell_meas",
+            },
+            {
+                "tableRow": 1,
+                "tableCol": 9,
+                "column": ["gsm_c32"],
+                "table": "gsm_cell_meas",
+            },
+            {"name": "Neightbor Cells:", "column": [], "table": "", "shiftRight": 1},
+        ]
+
+        for n in range(MAX_NEIGHBORS):
+            i = n + 1
+            neighborRow = [
+                {
+                    "name": "#%d" % i,
+                    "column": [
+                        "gsm_cellfile_matched_neighbor_cellname",
+                        "gsm_cellfile_matched_neighbor_lac_%d" % i,
+                        "gsm_neighbor_bsic_%d" % i,
+                        "gsm_neighbor_arfcn_%d" % i,
+                        "gsm_neighbor_rxlev_dbm_%d" % i,
+                        "gsm_neighbor_c1_%d" % i,
+                        "gsm_neighbor_c2_%d" % i,
+                        "gsm_neighbor_c31_%d" % i,
+                        "gsm_neighbor_c32_%d" % i,
+                    ],
+                    "table": "gsm_cell_meas",
+                },
+            ]
+            elementDictList += neighborRow
+
+        return elementDictList
+
+    def getCurrentChannel(self):
+        elementDictList = [
+            {"name": "Time", "column": ["global_time"], "table": "global_time",},
+            {
+                "name": "Cellname",
+                "column": ["gsm_cellfile_matched_cellname"],
+                "table": "gsm_cell_meas",
+            },
+            {"name": "CGI", "column": ["gsm_cgi"], "table": "gsm_cell_meas",},
+            {
+                "name": "Channel type",
+                "column": ["gsm_channeltype"],
                 "table": "gsm_rr_chan_desc",
             },
             {
-                "element": "Sub channel number",
-                "column": 'gsm_subchannelnumber as "Sub channel number"',
+                "name": "Sub channel number",
+                "column": ["gsm_subchannelnumber"],
                 "table": "gsm_rr_subchan",
             },
             {
-                "element": "Mobile Allocation Index Offset (MAIO)",
-                "column": 'gsm_maio as "Mobile Allocation Index Offset (MAIO)"',
+                "name": "Mobile Allocation Index Offset (MAIO)",
+                "column": ["gsm_maio"],
                 "table": "gsm_rr_chan_desc",
             },
             {
-                "element": "Hopping Sequence Number (HSN)",
-                "column": 'gsm_hsn as "Hopping Sequence Number (HSN)"',
+                "name": "Hopping Sequence Number (HSN)",
+                "column": ["gsm_hsn"],
                 "table": "gsm_rr_chan_desc",
             },
             {
-                "element": "Cipering Algorithm",
-                "column": 'gsm_cipheringalgorithm as "Cipering Algorithm"',
+                "name": "Cipering Algorithm",
+                "column": ["gsm_cipheringalgorithm"],
                 "table": "gsm_rr_cipher_alg",
             },
             {
-                "element": "MS Power Control Level",
-                "column": 'gsm_ms_powercontrollevel as "MS Power Control Level"',
+                "name": "MS Power Control Level",
+                "column": ["gsm_ms_powercontrollevel"],
                 "table": "gsm_rr_power_ctrl",
             },
             {
-                "element": "Channel Mode",
-                "column": 'gsm_channelmode as "Channel Mode"',
+                "name": "Channel Mode",
+                "column": ["gsm_channelmode"],
                 "table": "gsm_chan_mode",
             },
             {
-                "element": "Speech Codec TX",
-                "column": 'gsm_speechcodectx as "Speech Codec TX"',
+                "name": "Speech Codec TX",
+                "column": ["gsm_speechcodectx"],
                 "table": "vocoder_info",
             },
             {
-                "element": "Speech Codec RX",
-                "column": 'gsm_speechcodecrx as "Speech Codec RX"',
+                "name": "Speech Codec RX",
+                "column": ["gsm_speechcodecrx"],
                 "table": "vocoder_info",
             },
             {
-                "element": "Hopping Channel",
-                "column": 'gsm_hoppingchannel as "Hopping Channel"',
+                "name": "Hopping Channel",
+                "column": ["gsm_hoppingchannel"],
                 "table": "gsm_rr_chan_desc",
             },
             {
-                "element": "Hopping Frequencies",
-                "column": 'gsm_hoppingfrequencies as "Hopping Frequencies"',
+                "name": "Hopping Frequencies",
+                "column": ["gsm_hoppingfrequencies"],
                 "table": "gsm_hopping_list",
             },
             {
-                "element": "ARFCN BCCH",
-                "column": 'gsm_arfcn_bcch as "ARFCN BCCH"',
+                "name": "ARFCN BCCH",
+                "column": ["gsm_arfcn_bcch"],
                 "table": "gsm_cell_meas",
             },
             {
-                "element": "ARFCN TCH",
-                "column": 'gsm_arfcn_tch as "ARFCN TCH"',
+                "name": "ARFCN TCH",
+                "column": ["gsm_arfcn_tch"],
                 "table": "gsm_rr_chan_desc",
             },
             {
-                "element": "Time slot",
-                "column": 'gsm_timeslot as "Time slot"',
+                "name": "Time slot",
+                "column": ["gsm_timeslot"],
                 "table": "gsm_rr_chan_desc",
             },
         ]
 
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-            dateString = "%s" % (self.timeFilter)
-
-        dataList.append(["Time", self.timeFilter])
-        for dic in gsmFields:
-            element = dic["element"]
-            column = dic["column"]
-            table = dic["table"]
-            if element and column and table:
-                queryString = """ SELECT %s
-                                FROM %s
-                                %s
-                                ORDER BY time DESC
-                                LIMIT 1 """ % (
-                    column,
-                    table,
-                    condition,
-                )
-                query = QSqlQuery()
-                queryStatus = query.exec_(queryString)
-                if queryStatus:
-                    firstRow = query.first()
-                    value = query.value(element) or ""
-                    dataList.append([element, value])
-
-        self.closeConnection()
-        return dataList
+        return elementDictList
 
     def getCSlashI(self):
-        self.openConnection()
-        dataList = []
-        condition = ""
-        maxUnits = 10
+        maxUnits = 32
+        elementDictList = [
+            {
+                "name": "Time",
+                "column": ["global_time"],
+                "table": "global_time",
+                "shiftLeft": 1,
+            },
+            {"name": "Worst", "column": ["gsm_coi_worst"], "table": "gsm_coi_per_chan"},
+            {"name": "Avg", "column": ["gsm_coi_avg"], "table": "gsm_coi_per_chan"},
+        ]
 
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-        dataList.append([self.timeFilter, "", ""])
-        queryString = """SELECT gsm_coi_avg, gsm_coi_worst
-                        FROM gsm_coi_per_chan
-                        %s
-                        ORDER BY time DESC
-                        LIMIT 1""" % (
-            condition
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        while query.next():
-
-            dataList.append(["Worst", query.value("gsm_coi_worst"), ""])
-            dataList.append(["Avg", query.value("gsm_coi_avg"), ""])
-
-        for unit in range(1, maxUnits):
-            column = "gsm_coi_arfcn_%s, gsm_coi_%s" % (unit, unit)
-            queryString = """SELECT %s
-                            FROM gsm_coi_per_chan
-                            %s
-                            ORDER BY time DESC
-                            LIMIT 1""" % (
-                column,
-                condition,
-            )
-            query = QSqlQuery()
-            queryStatus = query.exec_(queryString)
-            if queryStatus:
-                firstRow = query.first()
-                if query.value(0) or query.value(1):
-                    dataList.append(
-                        ["", query.value(0) or "", query.value(1) or "",]
-                    )
-        self.closeConnection()
-        return dataList
+        for unit in range(0, maxUnits):
+            unitNo = unit + 1
+            unitRow = [
+                {
+                    "name": "#%d" % unitNo,
+                    "column": ["gsm_coi_arfcn_%d" % unitNo, "gsm_coi_%d" % unitNo],
+                    "table": "gsm_coi_per_chan",
+                }
+            ]
+            elementDictList += unitRow
+        return elementDictList
 
     def openConnection(self):
         if self.azenqosDatabase is not None:
