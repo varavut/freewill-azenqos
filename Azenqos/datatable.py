@@ -135,6 +135,8 @@ class TableWindow(QWidget):
 
         for customItem in self.customData:
             try:
+                if customItem["text"] == '""':
+                    customItem["text"] = ""
                 dataList[customItem["row"]][customItem["column"]] = customItem["text"]
             except:
                 self.customData.remove(customItem)
@@ -311,14 +313,16 @@ class TableWindow(QWidget):
                 self.tableHeader = ["Element", "Value", "MS", "Color"]
             elif self.title == "LTE_LTE RLC":
                 self.tableHeader = ["Element", "Value", "", "", ""]
-                self.dataList = LteDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRlc()
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(gc.azenqosDatabase, gc.currentDateTimeString).getRlc()
+                )
             elif self.title == "LTE_LTE VoLTE":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = LteDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getVolte()
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getVolte()
+                )
 
             # CDMA/EVDO
             elif self.title == "CDMA/EVDO_Radio Parameters":
@@ -444,41 +448,60 @@ class TableWindow(QWidget):
         # [table,value,row,column]
         activeSchema = []
         extraRow = 0
-        filteredRow = list(filter(lambda elem: "name" in elem, elementDict))
+        filteredRow = list(
+            filter(
+                lambda elem: "name" in elem and "column" in elem and "table" in elem,
+                elementDict,
+            )
+        )
         self.columns = len(self.tableHeader)
         self.rows = len(filteredRow)
         for row, element in enumerate(elementDict):
             if "tableRow" in element and "tableCol" in element:
-                activeSchema.append(
-                    {
-                        "table": element["table"],
-                        "field": element["column"][0],
+                if "name" in element:
+                    rowTitle = {
                         "row": element["tableRow"],
                         "column": element["tableCol"],
+                        "text": element["name"],
                     }
-                )
+                    self.customData.append(rowTitle)
+                else:
+                    activeSchema.append(
+                        {
+                            "table": element["table"],
+                            "field": element["column"][0],
+                            "row": element["tableRow"],
+                            "column": element["tableCol"],
+                        }
+                    )
                 extraRow += 1
 
             else:
                 shiftRight = 0
+                shiftLeft = 0
                 if "shiftRight" in element:
                     shiftRight = element["shiftRight"]
-                rowTitle = {
-                    "row": row - extraRow,
-                    "column": 0 + shiftRight,
-                    "text": element["name"],
-                }
-                self.customData.append(rowTitle)
+                if "shiftLeft" in element:
+                    shiftLeft = element["shiftLeft"]
+                totalShift = shiftRight - shiftLeft
+                if not totalShift < 0:
+                    rowTitle = {
+                        "row": row - extraRow,
+                        "column": 0 + totalShift,
+                        "text": element["name"],
+                    }
+                    self.customData.append(rowTitle)
 
                 for column, item in enumerate(element["column"]):
-                    activeSchema.append(
-                        {
-                            "table": element["table"],
-                            "field": item,
-                            "row": row - extraRow,
-                            "column": column + 1 + shiftRight,
-                        }
-                    )
+                    if not (totalShift + column + 1) < 0:
+                        activeSchema.append(
+                            {
+                                "table": element["table"],
+                                "field": item,
+                                "row": row - extraRow,
+                                "column": column + 1 + totalShift,
+                            }
+                        )
 
         return activeSchema
 

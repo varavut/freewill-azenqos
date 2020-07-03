@@ -332,7 +332,6 @@ class PropertiesWindow(QWidget):
                         "text": data.text(col),
                     }
                 )
-            self.data_set = self.getDataSet()
 
     def changeTreeWidget(self):
 

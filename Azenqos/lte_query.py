@@ -444,126 +444,139 @@ class LteDataQuery:
         return elementDictList
 
     def getRlc(self):
-        self.openConnection()
 
         dataList = []
         condition = ""
         maxBearers = 8
 
-        if self.timeFilter:
-            condition = "WHERE time <= '%s'" % (self.timeFilter)
-        dataList.append(["Time", self.timeFilter, "", "", ""])
-        queryString = """SELECT time, lte_rlc_dl_tp_mbps, lte_rlc_dl_tp, lte_rlc_n_bearers
-                        FROM lte_rlc_stats
-                        %s
-                        ORDER BY time DESC
-                        LIMIT 1""" % (
-            condition
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        if query.first():
-            dataList.append(
-                ["DL TP(Mbps)", query.value("lte_rlc_dl_tp_mbps") or "", "", "", ""]
-            )
-            dataList.append(
-                ["DL TP(Kbps)", query.value("lte_rlc_dl_tp") or "", "", "", ""]
-            )
-            dataList.append(["Bearers:", "", "", "", ""])
-            dataList.append(
-                ["N Bearers", query.value("lte_rlc_n_bearers") or "", "", "", ""]
-            )
-        for bearer in range(1, maxBearers):
-            bearerNo = bearer + 1
-            queryString = """SELECT lte_rlc_per_rb_dl_rb_mode_%d, lte_rlc_per_rb_dl_rb_type_%d, lte_rlc_per_rb_dl_rb_id_%d, lte_rlc_per_rb_cfg_index_%d,
-                            lte_rlc_per_rb_dl_tp_%d
-                            FROM lte_rlc_stats
-                            %s
-                            ORDER BY time DESC
-                            LIMIT 1""" % (
-                bearerNo,
-                bearerNo,
-                bearerNo,
-                bearerNo,
-                bearerNo,
-                condition,
-            )
-            query = QSqlQuery()
-            query.exec_(queryString)
-            while query.next():
-                if bearerNo == 1:
-                    dataList.append(["Mode", "Type", "RB-ID", "Index", "TP Mbps"])
-                dataList.append(
-                    [
-                        query.value(0) or "",
-                        query.value(1) or "",
-                        query.value(2) or "",
-                        query.value(3) or "",
-                        query.value(4) or "",
-                    ]
-                )
-        self.closeConnection()
-        return dataList
-
-    def getVolte(self):
-        self.openConnection()
-        dataList = []
-        condition = ""
-        volteFields = [
-            "Time",
-            "Codec:",
-            "AMR SpeechCodec-RX",
-            "AMR SpeechCodec-TX",
-            "Delay interval avg:",
-            "Audio Packet delay (ms.)",
-            "RTP Packet delay (ms.)",
-            "RTCP SR Params:",
-            "RTCP Round trip time (ms.)",
-            "RTCP SR Params - Jitter DL:",
-            "RTCP SR Jitter DL (ts unit)",
-            "RTCP SR Jitter DL (ms.)",
-            "RTCP SR Params - Jitter UL:",
-            "RTCP SR Jitter UL (ts unit)",
-            "RTCP SR Jitter UL (ms.)",
-            "RTCP SR Params - Packet loss rate:",
-            "RTCP SR Packet loss DL (%)",
-            "RTCP SR Packet loss UL (%)",
+        elementDictList = [
+            {"name": "Time", "column": ["global_time"], "table": "global_time",},
+            {
+                "name": "DL TP(Mbps)",
+                "column": ["lte_rlc_dl_tp_mbps"],
+                "table": "lte_rlc_stats",
+            },
+            {
+                "name": "DL TP(Kbps)",
+                "column": ["lte_rlc_dl_tp"],
+                "table": "lte_rlc_stats",
+            },
+            {
+                "name": "N Bearers",
+                "column": ["lte_rlc_n_bearers"],
+                "table": "lte_rlc_stats",
+            },
+            {"name": "Mode", "column": [], "table": ""},
+            {"tableRow": 4, "tableCol": 1, "name": "Type",},
+            {"tableRow": 4, "tableCol": 2, "name": "RB-ID",},
+            {"tableRow": 4, "tableCol": 3, "name": "Index",},
+            {"tableRow": 4, "tableCol": 4, "name": "TP Mbps",},
         ]
 
-        if self.timeFilter:
-            condition = "WHERE lvs.time <= '%s'" % (self.timeFilter)
+        for bearer in range(0, maxBearers):
+            bearerNo = bearer + 1
+            bearerElement = [
+                {
+                    "name": "",
+                    "column": ["lte_rlc_per_rb_dl_rb_mode_%d" % bearerNo],
+                    "table": "lte_rlc_stats",
+                    "shiftLeft": 1,
+                },
+                {
+                    "tableRow": 5 + bearer,
+                    "tableCol": 1,
+                    "column": ["lte_rlc_per_rb_dl_rb_type_%d" % bearerNo],
+                    "table": "lte_rlc_stats",
+                },
+                {
+                    "tableRow": 5 + bearer,
+                    "tableCol": 2,
+                    "column": ["lte_rlc_per_rb_dl_rb_id_%d" % bearerNo],
+                    "table": "lte_rlc_stats",
+                },
+                {
+                    "tableRow": 5 + bearer,
+                    "tableCol": 3,
+                    "column": ["lte_rlc_per_rb_cfg_index_%d" % bearerNo],
+                    "table": "lte_rlc_stats",
+                },
+                {
+                    "tableRow": 5 + bearer,
+                    "tableCol": 4,
+                    "column": ["lte_rlc_per_rb_dl_tp_%d" % bearerNo],
+                    "table": "lte_rlc_stats",
+                },
+            ]
+            elementDictList += bearerElement
 
-        queryString = """SELECT lvs.time, '' AS codec, vi.gsm_speechcodecrx, vi.gsm_speechcodectx, '' AS delay_interval,
-                        vi.vocoder_amr_audio_packet_delay_avg, lvs.lte_volte_rtp_pkt_delay_avg, '' AS rtcp_sr_params,
-                        lvs.lte_volte_rtp_round_trip_time, '' AS rtcp_jitter_dl, lvs.lte_volte_rtp_jitter_dl,
-                        lvs.lte_volte_rtp_jitter_dl_millis, '' AS rtcp_jitter_ul, lte_volte_rtp_jitter_ul, lte_volte_rtp_jitter_ul_millis,
-                        '' AS rtcp_sr_packet_loss, lte_volte_rtp_packet_loss_rate_dl, lte_volte_rtp_packet_loss_rate_ul
-                        FROM lte_volte_stats AS lvs
-                        LEFT JOIN vocoder_info vi ON lvs.time = vi.time
-                        %s
-                        ORDER BY lvs.time DESC
-                        LIMIT 1""" % (
-            condition
-        )
-        query = QSqlQuery()
-        query.exec_(queryString)
-        while query.next():
-            for field in range(len(volteFields)):
-                if field == 0:
-                    dataList.append([volteFields[field], self.timeFilter])
-                else:
-                    if query.value(field):
-                        dataList.append([volteFields[field], query.value(field)])
-                    else:
-                        dataList.append([volteFields[field], ""])
-        if len(dataList) == 0:
-            for field in range(len(volteFields)):
-                if field == 0:
-                    dataList.append([volteFields[field], self.timeFilter])
-                else:
-                    dataList.append([volteFields[field], ""])
-        self.closeConnection()
-        return dataList
+        return elementDictList
+
+    def getVolte(self):
+        elementDictList = [
+            {"name": "Time", "column": ["global_time"], "table": "global_time",},
+            {"name": "Codec:", "column": [], "table": "",},
+            {
+                "name": "AMR SpeechCodec-RX",
+                "column": ["gsm_speechcodecrx"],
+                "table": "vocoder_info",
+            },
+            {
+                "name": "AMR SpeechCodec-TX",
+                "column": ["gsm_speechcodectx"],
+                "table": "vocoder_info",
+            },
+            {"name": "Delay interval avg:", "column": [], "table": "",},
+            {
+                "name": "Audio Packet delay (ms.)",
+                "column": ["vocoder_amr_audio_packet_delay_avg"],
+                "table": "vocoder_info",
+            },
+            {
+                "name": "RTP Packet delay (ms.)",
+                "column": ["lte_volte_rtp_pkt_delay_avg"],
+                "table": "lte_volte_stats",
+            },
+            {"name": "RTCP SR Params:", "column": [], "table": "",},
+            {
+                "name": "RTCP Round trip time (ms.)",
+                "column": ["lte_volte_rtp_round_trip_time"],
+                "table": "lte_volte_stats",
+            },
+            {"name": "RTCP SR Params - Jitter DL:", "column": [], "table": "",},
+            {
+                "name": "RTCP SR Jitter DL (ts unit)",
+                "column": ["lte_volte_rtp_jitter_dl"],
+                "table": "lte_volte_stats",
+            },
+            {
+                "name": "RTCP SR Jitter DL (ms.)",
+                "column": ["lte_volte_rtp_jitter_dl_millis"],
+                "table": "lte_volte_stats",
+            },
+            {"name": "RTCP SR Params - Jitter UL:", "column": [], "table": "",},
+            {
+                "name": "RTCP SR Jitter UL (ts unit)",
+                "column": ["lte_volte_rtp_jitter_ul"],
+                "table": "lte_volte_stats",
+            },
+            {
+                "name": "RTCP SR Jitter UL (ms.)",
+                "column": ["lte_volte_rtp_jitter_ul_millis"],
+                "table": "lte_volte_stats",
+            },
+            {"name": "RTCP SR Params - Packet loss rate:", "column": [], "table": "",},
+            {
+                "name": "RTCP SR Packet loss DL (%)",
+                "column": ["lte_volte_rtp_packet_loss_rate_dl"],
+                "table": "lte_volte_stats",
+            },
+            {
+                "name": "RTCP SR Packet loss UL (%)",
+                "column": ["lte_volte_rtp_packet_loss_rate_ul"],
+                "table": "lte_volte_stats",
+            },
+        ]
+        return elementDictList
 
     def defaultData(self, fieldsList, dataList):
         fieldCount = len(fieldsList)
