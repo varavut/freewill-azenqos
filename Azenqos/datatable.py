@@ -227,14 +227,18 @@ class TableWindow(QWidget):
                     "Freq",
                     "Event",
                 ]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getActiveMonitoredSets()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getActiveMonitoredSets()
+                )
             elif self.title == "WCDMA_Radio Parameters":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRadioParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRadioParameters()
+                )
             elif self.title == "WCDMA_Active Set List":
                 self.tableHeader = [
                     "Time",
@@ -244,24 +248,32 @@ class TableWindow(QWidget):
                     "Cell TPC",
                     "Diversity",
                 ]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getActiveSetList()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getActiveSetList()
+                )
             elif self.title == "WCDMA_Monitored Set List":
                 self.tableHeader = ["Time", "Freq", "PSC", "Cell Position", "Diversity"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getMonitoredSetList()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getMonitoredSetList()
+                )
             elif self.title == "WCDMA_BLER Summary":
                 self.tableHeader = ["Element", "Value"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getBlerSummary()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getBlerSummary()
+                )
             elif self.title == "WCDMA_BLER / Transport Channel":
                 self.tableHeader = ["Transport Channel", "Percent", "Err", "Rcvd"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getBLER_TransportChannel()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getBLER_TransportChannel()
+                )
             elif self.title == "WCDMA_Line Chart":
                 self.tableHeader = ["Element", "Value", "MS", "Color"]
             elif self.title == "WCDMA_Bearers":
@@ -271,27 +283,35 @@ class TableWindow(QWidget):
                     "Bearers Rate DL",
                     "Bearers Rate UL",
                 ]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getBearers()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getBearers()
+                )
             elif self.title == "WCDMA_Pilot Poluting Cells":
                 self.tableHeader = ["Time", "N Cells", "SC", "RSCP", "Ec/Io"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getPilotPolutingCells()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getPilotPolutingCells()
+                )
             elif self.title == "WCDMA_Active + Monitored Bar":
                 self.tableHeader = ["Cell Type", "Ec/Io", "RSCP"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getActiveMonitoredBar()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getActiveMonitoredBar()
+                )
             elif self.title == "WCDMA_CM GSM Reports":
                 self.tableHeader = ["Time", "", "Eq.", "Name", "Info."]
 
             elif self.title == "WCDMA_CM GSM Cells":
                 self.tableHeader = ["Time", "ARFCN", "RxLev", "BSIC", "Measure"]
-                self.dataList = WcdmaDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getCmGsmCells()
+                self.appliedSchema = self.initializeQuerySchema(
+                    WcdmaDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getCmGsmCells()
+                )
             elif self.title == "WCDMA_Pilot Analyzer":
                 self.tableHeader = ["Element", "Value", "Cell Type", "Color"]
 
@@ -798,17 +818,12 @@ class CustomizeQuery:
                 thirdLvSub.append(innerSubQuery)
 
             uniqueColumns = ",".join(uniqueColumns)
-            queryString = "( SELECT %s,1 as row_num FROM %s LIMIT 1 ) %s " % (
-                uniqueColumns,
+            queryString = "( SELECT * FROM %s LIMIT 1 ) %s " % (
                 ",".join(thirdLvSub),
                 uniqueTables[tableIndex],
             )
             if not tableIndex == 0:
-                queryString = "JOIN %s ON %s.row_num=%s.row_num " % (
-                    queryString,
-                    uniqueTables[tableIndex - 1],
-                    uniqueTables[tableIndex],
-                )
+                queryString = ", %s " % (queryString)
 
             self.queryString.append(queryString)
 
