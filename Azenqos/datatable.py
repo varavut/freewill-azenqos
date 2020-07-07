@@ -812,14 +812,15 @@ class CustomizeQuery:
 
             for indexCol, col in enumerate(selectedColumns):
                 innerSubQuery = (
-                    "(SELECT IFNULL(( SELECT %s FROM %s %s ORDER BY time DESC LIMIT 1),NULL) AS %s) "
+                    " IFNULL(( SELECT %s FROM %s %s ORDER BY time DESC LIMIT 1),NULL) AS %s "
                     % (col, tableData, condition, uniqueColumns[indexCol])
                 )
                 thirdLvSub.append(innerSubQuery)
 
             uniqueColumns = ",".join(uniqueColumns)
+            fullSubQuery = "(SELECT %s)" % (",".join(thirdLvSub))
             queryString = "( SELECT * FROM %s LIMIT 1 ) %s " % (
-                ",".join(thirdLvSub),
+                fullSubQuery,
                 uniqueTables[tableIndex],
             )
             if not tableIndex == 0:
