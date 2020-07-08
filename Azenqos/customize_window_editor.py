@@ -201,15 +201,17 @@ class CellSetting(QWidget):
             item = ast.literal_eval(self.selected_item.text(0))
             if len(item) == 2:
                 self.rbInformationElement.setChecked(True)
-                index = self.cbSystem.findText("Unlisted")
-                if index >= 0:
-                    self.cbSystem.setCurrentIndex(index)
-                    elementIndex = self.fcbElement.findText(item[1])
-                    if elementIndex >= 0:
-                        self.fcbElement.setCurrentIndex(elementIndex)
-                        valueIndex = self.fcbValue.findText(item[0])
-                        if valueIndex >= 0:
-                            self.fcbValue.setCurrentIndex(valueIndex)
+                for sysType in self.system_types:
+                    index = self.cbSystem.findText(sysType)
+                    if index >= 0:
+                        self.cbSystem.setCurrentIndex(index)
+                        elementIndex = self.fcbElement.findText(item[1])
+                        if elementIndex >= 0:
+                            self.fcbElement.setCurrentIndex(elementIndex)
+                            valueIndex = self.fcbValue.findText(item[0])
+                            if valueIndex >= 0:
+                                self.fcbValue.setCurrentIndex(valueIndex)
+                                break
 
         except:
             item = self.selected_item.text(0)
