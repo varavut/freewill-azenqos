@@ -1570,6 +1570,8 @@ class LineChart(QWidget):
 
         self.title = windowName
         self.tablewidget = tablewidget
+        self.tablewidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tablewidget.cellDoubleClicked.connect(self.openColorPicker)
         # self.datelabel = datelabel
         self.Date = []
         self.Time = []
@@ -1588,7 +1590,10 @@ class LineChart(QWidget):
         # self.datelabel.setReadOnly(True)
         # self.datelabel.setObjectName("lineEdit")
         # self.datelabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.drawLines()
 
+    # Draw line in linechart
+    def drawLines(self):
         # Choose Line Chart By WindowName
         if self.title == "LTE_LTE Line Chart":
             self.LTE()
@@ -1602,6 +1607,32 @@ class LineChart(QWidget):
             self.WCDMA_Data()
         elif self.title == "Data_GSM Data Line Chart":
             self.GSM_Data()
+
+    def repaintLines(self):
+        for colorindex in range(len(self.lines)):
+            self.lines[colorindex].setPen(pg.mkPen(self.ColorArr[colorindex], width=2))
+
+    # Handle double clicked cell
+    def openColorPicker(self, row, col):
+        columnHeader = self.tablewidget.horizontalHeaderItem(col)
+        if columnHeader.text() == "Color":
+            currentColor = self.tablewidget.item(row, col).background().color()
+            colorDialog = QtGui.QColorDialog()
+            colorDialog.colorSelected.connect(
+                lambda color, rowIndex=row, colIndex=col: self.applyColor(
+                    color, rowIndex, colIndex
+                )
+            )
+            colorDialog.setCurrentColor(currentColor)
+            colorDialog.open()
+            self.colorDialog = colorDialog
+
+    def applyColor(self, color, rowIndex, colIndex):
+        tableCell = self.tablewidget.item(rowIndex, colIndex)
+        tableCell.setBackground(QtGui.QBrush(color))
+        tableCell.setSelected(False)
+        self.ColorArr[rowIndex] = color.name()
+        self.repaintLines()
 
     # Event Function
     def on_pick(self, event):
@@ -1649,7 +1680,8 @@ class LineChart(QWidget):
             # self.datelabel.setText("Date: " + self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
             x = self.Time
             self.xdict = dict(enumerate(x))
             self.stringaxis.setTicks([self.xdict.items()])
@@ -1714,7 +1746,8 @@ class LineChart(QWidget):
             # self.datelabel.setText("Date: " + self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
             x = self.Time
             self.xdict = dict(enumerate(x))
             self.stringaxis.setTicks([self.xdict.items()])
@@ -1785,7 +1818,8 @@ class LineChart(QWidget):
             # self.datelabel.setText(self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
 
             x = self.Time
             self.xdict = dict(enumerate(x))
@@ -1857,7 +1891,8 @@ class LineChart(QWidget):
             # self.datelabel.setText(self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
 
             x = self.Time
             self.xdict = dict(enumerate(x))
@@ -1924,7 +1959,8 @@ class LineChart(QWidget):
             # self.datelabel.setText("Date: " + self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
             x = self.Time
             self.xdict = dict(enumerate(x))
             self.stringaxis.setTicks([self.xdict.items()])
@@ -1992,7 +2028,8 @@ class LineChart(QWidget):
             # self.datelabel.setText(self.Date[0])
 
             # Ploting Graph
-            self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
+            if len(self.ColorArr) == 0:
+                self.ColorArr = ["#ff0000", "#0000ff", "#007c00", "#ff77ab", "#000000"]
 
             x = self.Time
             self.xdict = dict(enumerate(x))
