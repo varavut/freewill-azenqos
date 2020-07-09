@@ -54,7 +54,9 @@ class TableWindow(QWidget):
         self.parentWindow = parent
         self.setupUi()
         self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.generateMenu)
+        windowParentName = (windowName.split("_"))[0]
+        if not windowParentName == "Signaling":
+            self.customContextMenuRequested.connect(self.generateMenu)
         self.properties_window = PropertiesWindow(
             self,
             gc.azenqosDatabase,

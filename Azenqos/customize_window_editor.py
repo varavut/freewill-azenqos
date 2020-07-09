@@ -10,6 +10,7 @@ import ast
 class CellSetting(QWidget):
     # databasePath = '/Users/Maxorz/Desktop/DB_Test/ARGazqdata.db'
     system_types = [
+        "GSM",
         "WCDMA",
         "General",
         "Positioning",
@@ -225,7 +226,10 @@ class CellSetting(QWidget):
     def cbSystemOnChanged(self, value):
         # ['WCDMA', 'General', 'Positioning', 'Data', 'Non-Access-Stratum', 'Wifi', 'LTE', 'CDMA', 'Android', 'NB-IoT', 'Unlisted']
         queryString = ""
-        if value == "WCDMA":
+        if value == "GSM":
+            queryString = "SELECT name FROM sqlite_master WHERE type ='table' AND name LIKE 'gsm%'"
+
+        elif value == "WCDMA":
             queryString = "SELECT name FROM sqlite_master WHERE type ='table' AND name LIKE 'wcdma%'"
 
         elif value == "General":
@@ -258,6 +262,7 @@ class CellSetting(QWidget):
         elif value == "Unlisted":
             queryString = "SELECT name FROM sqlite_master WHERE type ='table'"
 
+        self.fcbElement.clear()
         if value and queryString:
             dataList = []
             if not self.db.isOpen():
@@ -273,7 +278,6 @@ class CellSetting(QWidget):
 
             self.db.close()
 
-            self.fcbElement.clear()
             if dataList:
                 self.fcbElement.addItems(dataList)
 
