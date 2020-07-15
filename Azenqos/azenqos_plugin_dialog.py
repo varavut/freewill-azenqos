@@ -552,7 +552,7 @@ class AzenqosDialog(QMainWindow):
         # self.setupTreeWidget(AzenqosDialog)
         self.mdi = GroupArea()
         self.setCentralWidget(self.mdi)
-        toolbar = self.addToolBar("toolbar")
+        toolbar = self.addToolBar("Azenqos Toolbar")
         self.toolbar = toolbar
         dirname = os.path.dirname(__file__)
         AzenqosDialog.setWindowIcon(QIcon(QPixmap(os.path.join(dirname, "icon.png"))))
@@ -1034,6 +1034,12 @@ class AzenqosDialog(QMainWindow):
         self.posObjs = []
         self.posIds = []
         for tableName in gc.activeLayers:
+            layer = QgsProject.instance().mapLayersByName(tableName)
+            if len(layer) == 0:
+                continue
+            node = QgsProject.instance().layerTreeRoot().findLayer(layer[0].id())
+            if not node.isVisible():
+                continue
             query = QSqlQuery()
             queryString = (
                 "SELECT posid FROM %s WHERE time <= '%s' AND geom IS NOT NULL ORDER BY time DESC LIMIT 1"
