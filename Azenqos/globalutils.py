@@ -247,6 +247,31 @@ class Utils:
         f.close()
         return False
 
+    def saveLayerStyle(self, layer):
+        layerName = layer.name()
+        fileName = layerName + ".qml"
+        file_folder_path = gc.CURRENT_PATH + "/style"
+        if not os.path.exists(file_folder_path):
+            os.makedirs(file_folder_path)
+        file_list = os.listdir(file_folder_path)
+        if len(file_list) > 0:
+            for f in file_list:
+                if f == fileName:
+                    os.remove(file_folder_path + "/" + f)
+        layer.saveNamedStyle(file_folder_path + "/" + fileName)
+
+    def loadLayerStyle(self, layer):
+        layerName = layer.name()
+        fileName = layerName + ".qml"
+        file_folder_path = gc.CURRENT_PATH + "/style"
+        if not os.path.exists(file_folder_path):
+            return False
+        file_list = os.listdir(file_folder_path)
+        if len(file_list) > 0:
+            for f in file_list:
+                if f == fileName:
+                    layer.loadNamedStyle(file_folder_path + "/" + fileName)
+
     def openConnection(self, db: QSqlDatabase):
         if db:
             if not db.isOpen():

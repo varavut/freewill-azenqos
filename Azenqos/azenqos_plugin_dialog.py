@@ -141,12 +141,20 @@ class AzenqosDialog(QMainWindow):
                 uri.setDataSource("", " ".join(name[1:]), geom_column)
                 layer.setDataSource(uri.uri(), " ".join(name[1:]), "spatialite")
 
+                # Handling layer customize style
+                layer.styleChanged.connect(self.handleStyleChange)
+                layer.rendererChanged.connect(self.handleStyleChange)
+                if layer.type() == layer.VectorLayer:
+                    Utils().loadLayerStyle(layer)
+
                 # Force adding layer to root node
                 # cloneLayer = layer.clone()
                 # root.insertChildNode(0, cloneLayer)
-        pass
 
-        # self.zoomToActiveLayer()
+    def handleStyleChange(self):
+        layer = iface.activeLayer()
+        if layer.type() == layer.VectorLayer:
+            Utils().saveLayerStyle(layer)
 
     def mergeLayerGroup(self, node, iFrom=None, iTo=None):
         if type(node) is QgsLayerTreeGroup:
@@ -339,7 +347,7 @@ class AzenqosDialog(QMainWindow):
         self.actionNR_Data_Line_Chart.setObjectName("actionNR_Data_Line_Chart")
         self.actionNR_Serving_Neighbors = QAction(AzenqosDialog)
         self.actionNR_Serving_Neighbors.setObjectName("actionNR_Serving_Neighbors")
-        
+
         self.menuFile.addAction(self.actionImport_log_azm)
         self.menuFile.addAction(self.actionExit)
         self.menuGSM.addAction(self.actionRadio_Parameters)
