@@ -246,7 +246,7 @@ class LineChartQueryNew:
             "nr_p_plus_scell_nr_pdsch_tput_mbps",
             "nr_p_plus_scell_nr_dl_pdcp_tput_mbps",
             "nr_p_plus_scell_lte_dl_pdcp_tput_mbps",
-            "nr_p_plus_scell_lte_ul_pdcp_tput_mbps"
+            "nr_p_plus_scell_lte_ul_pdcp_tput_mbps",
         ]
         self.openConnection()
         query = QSqlQuery()

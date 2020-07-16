@@ -97,7 +97,7 @@ class Ui_LTE_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_tableWidget.setItem(0, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_tableWidget.setItem(0, 3, item)
@@ -111,7 +111,7 @@ class Ui_LTE_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_tableWidget.setItem(1, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_tableWidget.setItem(1, 3, item)
@@ -125,7 +125,7 @@ class Ui_LTE_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_tableWidget.setItem(2, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 124, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_tableWidget.setItem(2, 3, item)
@@ -139,7 +139,7 @@ class Ui_LTE_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_tableWidget.setItem(3, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 119, 171))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(3)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_tableWidget.setItem(3, 3, item)
@@ -153,7 +153,7 @@ class Ui_LTE_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_tableWidget.setItem(4, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(4)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         # brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
@@ -345,7 +345,7 @@ class Ui_WCDMA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_tableWidget.setItem(0, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_tableWidget.setItem(0, 3, item)
@@ -359,7 +359,7 @@ class Ui_WCDMA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_tableWidget.setItem(1, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_tableWidget.setItem(1, 3, item)
@@ -373,7 +373,7 @@ class Ui_WCDMA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_tableWidget.setItem(2, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 124, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_tableWidget.setItem(2, 3, item)
@@ -387,7 +387,7 @@ class Ui_WCDMA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_tableWidget.setItem(3, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 119, 171))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(3)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_tableWidget.setItem(3, 3, item)
@@ -578,7 +578,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_data_tableWidget.setItem(0, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_data_tableWidget.setItem(0, 3, item)
@@ -592,7 +592,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_data_tableWidget.setItem(1, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_data_tableWidget.setItem(1, 3, item)
@@ -606,7 +606,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_data_tableWidget.setItem(2, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 124, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_data_tableWidget.setItem(2, 3, item)
@@ -620,7 +620,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.lte_data_tableWidget.setItem(3, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 119, 171))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(3)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.lte_data_tableWidget.setItem(3, 3, item)
@@ -722,6 +722,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         self.close()
         del self
 
+
 class Ui_NR_Data_LCwidget(QWidget):
     def __init__(self, parent, windowName, azenqosDB):
         super().__init__(parent)
@@ -778,7 +779,7 @@ class Ui_NR_Data_LCwidget(QWidget):
             font.setWeight(75)
             item.setFont(font)
             self.nr_data_tableWidget.setHorizontalHeaderItem(i, item)
-        
+
         for i in range(row_count):
             for j in range(col_count):
                 item = QTableWidgetItem()
@@ -788,7 +789,6 @@ class Ui_NR_Data_LCwidget(QWidget):
                     brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(i)))
                     brush.setStyle(QtCore.Qt.SolidPattern)
                     item.setBackground(brush)
-
 
         self.nr_data_tableWidget.setItem(row_count, col_count, item)
         self.nr_data_tableWidget.horizontalHeader().setVisible(True)
@@ -858,25 +858,36 @@ class Ui_NR_Data_LCwidget(QWidget):
         self.nr_data_tableWidget.setSortingEnabled(False)
         item = self.nr_data_tableWidget.item(0, 0)
         item.setText(
-            _translate("NR_Data_LCwidget",
-                       "Download Overall Throughput(kbps)")
+            _translate("NR_Data_LCwidget", "Download Overall Throughput(kbps)")
         )
         item = self.nr_data_tableWidget.item(1, 0)
         item.setText(_translate("NR_Data_LCwidget", "Upload Overall Throughput(kbps)"))
         item = self.nr_data_tableWidget.item(2, 0)
         item.setText(_translate("NR_Data_LCwidget", "LTE L1 Throughput Mbps[1]"))
         item = self.nr_data_tableWidget.item(3, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pusch_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pusch_tput_mbps")
+        )
         item = self.nr_data_tableWidget.item(4, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_ul_pdcp_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_ul_pdcp_tput_mbps")
+        )
         item = self.nr_data_tableWidget.item(5, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pdsch_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pdsch_tput_mbps")
+        )
         item = self.nr_data_tableWidget.item(6, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_dl_pdcp_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_dl_pdcp_tput_mbps")
+        )
         item = self.nr_data_tableWidget.item(7, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_dl_pdcp_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_dl_pdcp_tput_mbps")
+        )
         item = self.nr_data_tableWidget.item(8, 0)
-        item.setText(_translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_ul_pdcp_tput_mbps"))
+        item.setText(
+            _translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_ul_pdcp_tput_mbps")
+        )
         self.nr_data_tableWidget.setSortingEnabled(__sortingEnabled)
         self.datelabel.setText(_translate("NR_Data_LCwidget", "Date :"))
 
@@ -891,7 +902,6 @@ class Ui_NR_Data_LCwidget(QWidget):
         #     gc.tableList.remove(self.tablename)
         self.close()
         del self
-
 
 
 # WCDMA Data Line Chart UI
@@ -977,7 +987,7 @@ class Ui_WCDMA_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_data_tableWidget.setItem(0, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_data_tableWidget.setItem(0, 3, item)
@@ -991,7 +1001,7 @@ class Ui_WCDMA_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_data_tableWidget.setItem(1, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_data_tableWidget.setItem(1, 3, item)
@@ -1005,7 +1015,7 @@ class Ui_WCDMA_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_data_tableWidget.setItem(2, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 124, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_data_tableWidget.setItem(2, 3, item)
@@ -1019,7 +1029,7 @@ class Ui_WCDMA_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.wcdma_data_tableWidget.setItem(3, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 119, 171))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(3)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.wcdma_data_tableWidget.setItem(3, 3, item)
@@ -1204,7 +1214,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.tableWidget.setItem(0, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.tableWidget.setItem(0, 3, item)
@@ -1215,7 +1225,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.tableWidget.setItem(1, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.tableWidget.setItem(1, 3, item)
@@ -1226,7 +1236,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.tableWidget.setItem(2, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 124, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.tableWidget.setItem(2, 3, item)
@@ -1237,7 +1247,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.tableWidget.setItem(3, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 119, 171))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(3)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.tableWidget.setItem(3, 3, item)
@@ -1248,7 +1258,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.tableWidget.setItem(4, 2, item)
         item = QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(4)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
@@ -1408,7 +1418,7 @@ class Ui_GSM_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.gsm_tableWidget.setItem(0, 2, item)
         item = QtWidgets.QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.gsm_tableWidget.setItem(0, 3, item)
@@ -1422,7 +1432,7 @@ class Ui_GSM_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.gsm_tableWidget.setItem(1, 2, item)
         item = QtWidgets.QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.gsm_tableWidget.setItem(1, 3, item)
@@ -1589,7 +1599,7 @@ class Ui_GSM_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.gsm_data_tableWidget.setItem(0, 2, item)
         item = QtWidgets.QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(0)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.gsm_data_tableWidget.setItem(0, 3, item)
@@ -1604,7 +1614,7 @@ class Ui_GSM_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.gsm_data_tableWidget.setItem(1, 2, item)
         item = QtWidgets.QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 0, 255))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(1)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.gsm_data_tableWidget.setItem(1, 3, item)
@@ -1619,7 +1629,7 @@ class Ui_GSM_Data_LCwidget(QWidget):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         self.gsm_data_tableWidget.setItem(2, 2, item)
         item = QtWidgets.QTableWidgetItem()
-        brush = QtGui.QBrush(QtGui.QColor(0, 255, 0))
+        brush = QtGui.QBrush(QtGui.QColor(get_default_color_for_index(2)))
         brush.setStyle(QtCore.Qt.SolidPattern)
         item.setBackground(brush)
         self.gsm_data_tableWidget.setItem(2, 3, item)
@@ -1742,13 +1752,15 @@ class LineChart(QWidget):
 
         self.title = windowName
         self.tablewidget = tablewidget
+        self.tablewidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tablewidget.cellDoubleClicked.connect(self.openColorPicker)
         # self.datelabel = datelabel
         self.Date = []
         self.Time = []
         self.lines = []
         self.result = {}
         self.xdict = {}
-        
+        self.ColorArr = []
 
         # self.datelabel = QLineEdit(self)
         # self.datelabel.setGeometry(QtCore.QRect(400, 30, 110, 20))
@@ -1775,15 +1787,41 @@ class LineChart(QWidget):
         elif self.title == "Data_GSM Data Line Chart":
             self.GSM_Data()
         elif self.title == "Data_5G NR Data Line Chart":
-            self.NR_Data()   
+            self.NR_Data()
+
+    def repaintLines(self):
+        for colorindex in range(len(self.lines)):
+            self.lines[colorindex].setPen(pg.mkPen(self.ColorArr[colorindex], width=2))
+
+    # Handle double clicked cell
+    def openColorPicker(self, row, col):
+        columnHeader = self.tablewidget.horizontalHeaderItem(col)
+        if columnHeader.text() == "Color":
+            currentColor = self.tablewidget.item(row, col).background().color()
+            colorDialog = QtGui.QColorDialog()
+            colorDialog.colorSelected.connect(
+                lambda color, rowIndex=row, colIndex=col: self.applyColor(
+                    color, rowIndex, colIndex
+                )
+            )
+            colorDialog.setCurrentColor(currentColor)
+            colorDialog.open()
+            self.colorDialog = colorDialog
+
+    def applyColor(self, color, rowIndex, colIndex):
+        tableCell = self.tablewidget.item(rowIndex, colIndex)
+        tableCell.setBackground(QtGui.QBrush(color))
+        tableCell.setSelected(False)
+        self.ColorArr[rowIndex] = color.name()
+        self.repaintLines()
 
     # Event Function
     def on_pick(self, event):
         for Line in range(len(self.lines)):
             if self.lines[Line] == event:
-                self.lines[Line].setPen(pg.mkPen(color=get_default_color_for_index(Line), width=4))
+                self.lines[Line].setPen(pg.mkPen(color=self.ColorArr[Line], width=4))
             else:
-                self.lines[Line].setPen(pg.mkPen(color=get_default_color_for_index(Line), width=2))
+                self.lines[Line].setPen(pg.mkPen(color=self.ColorArr[Line], width=2))
 
     # Show Data In Table
     def get_table_data(self, event):
@@ -1823,7 +1861,7 @@ class LineChart(QWidget):
             # self.datelabel.setText("Date: " + self.Date[0])
 
             # Ploting Graph
-            
+
             x = self.Time
             self.xdict = dict(enumerate(x))
             self.stringaxis.setTicks([self.xdict.items()])
@@ -1838,9 +1876,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -1902,9 +1940,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -1973,9 +2011,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -2044,9 +2082,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -2109,9 +2147,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -2177,9 +2215,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
@@ -2229,9 +2267,9 @@ class LineChart(QWidget):
                     overallMin.append(np.nanmin(data[1]))
 
             for colorindex in range(len(self.lines)):
-                self.lines[colorindex].setPen(
-                    pg.mkPen(get_default_color_for_index(colorindex), width=2)
-                )
+                color = get_default_color_for_index(colorindex)
+                self.lines[colorindex].setPen(pg.mkPen(color, width=2))
+                self.ColorArr.append(color)
 
             # Scale Editing
             self.canvas.axes.setYRange(np.nanmin(overallMin), np.nanmax(overallMax))
