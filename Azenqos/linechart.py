@@ -754,7 +754,7 @@ class Ui_NR_Data_LCwidget(QWidget):
 
         # DataTable
         col_count = 4
-        row_count = 10
+        row_count = 8
 
         self.nr_data_tableWidget = QTableWidget(self)
         self.nr_data_tableWidget.setGeometry(QtCore.QRect(20, 395, 530, 161))
@@ -857,37 +857,21 @@ class Ui_NR_Data_LCwidget(QWidget):
         __sortingEnabled = self.nr_data_tableWidget.isSortingEnabled()
         self.nr_data_tableWidget.setSortingEnabled(False)
         item = self.nr_data_tableWidget.item(0, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "Download Overall Throughput(kbps)")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "App DL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(1, 0)
-        item.setText(_translate("NR_Data_LCwidget", "Upload Overall Throughput(kbps)"))
+        item.setText(_translate("NR_Data_LCwidget", "App UL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(2, 0)
-        item.setText(_translate("NR_Data_LCwidget", "LTE L1 Throughput Mbps[1]"))
+        item.setText(_translate("NR_Data_LCwidget", "NR+LTE DL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(3, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pusch_tput_mbps")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "NR+LTE UL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(4, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_ul_pdcp_tput_mbps")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "NR DL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(5, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_pdsch_tput_mbps")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "NR UL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(6, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_nr_dl_pdcp_tput_mbps")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "LTE DL Throughput (Mbps)"))
         item = self.nr_data_tableWidget.item(7, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_dl_pdcp_tput_mbps")
-        )
-        item = self.nr_data_tableWidget.item(8, 0)
-        item.setText(
-            _translate("NR_Data_LCwidget", "nr_p_plus_scell_lte_ul_pdcp_tput_mbps")
-        )
+        item.setText(_translate("NR_Data_LCwidget", "LTE UL Throughput (Mbps)"))
         self.nr_data_tableWidget.setSortingEnabled(__sortingEnabled)
         self.datelabel.setText(_translate("NR_Data_LCwidget", "Date :"))
 
@@ -1819,8 +1803,14 @@ class LineChart(QWidget):
     def on_pick(self, event):
         for Line in range(len(self.lines)):
             if self.lines[Line] == event:
+                self.lines[Line].setPen(
+                    pg.mkPen(color=get_default_color_for_index(Line), width=4)
+                )
                 self.lines[Line].setPen(pg.mkPen(color=self.ColorArr[Line], width=4))
             else:
+                self.lines[Line].setPen(
+                    pg.mkPen(color=get_default_color_for_index(Line), width=2)
+                )
                 self.lines[Line].setPen(pg.mkPen(color=self.ColorArr[Line], width=2))
 
     # Show Data In Table
