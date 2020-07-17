@@ -56,10 +56,11 @@ class LayerTask(QgsTask):
                         if child.layer().type() == QgsMapLayerType.VectorLayer:
                             extent.combineExtentWith(child.layer().extent())
                     except NameError as ne:
-                        print("check QgsMapLayerType.VectorLayer failed - try fallback to alt method")
+                        print(
+                            "check QgsMapLayerType.VectorLayer failed - try fallback to alt method"
+                        )
                         if child.layer().type() == 0:
                             extent.combineExtentWith(child.layer().extent())
-
 
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().refresh()

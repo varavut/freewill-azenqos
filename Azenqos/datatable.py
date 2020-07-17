@@ -367,13 +367,32 @@ class TableWindow(QWidget):
                     "SCC5",
                     "SCC6",
                 ]
-                self.dataList = NrDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getRadioParameters()
+                self.appliedSchema = self.initializeQuerySchema(
+                    NrDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRadioParameters()
+                )
             elif self.title == "5G NR_Serving + Neighbors":
-                (self.tableHeader, self.dataList) = NrDataQuery(
-                    gc.azenqosDatabase, gc.currentDateTimeString
-                ).getServingAndNeighbors()
+                self.tableHeader = [
+                    "",
+                    "PCI",
+                    "Beam ID",
+                    "RSRP",
+                    "RSRQ",
+                    "SINR",
+                    "Band",
+                    "Band Type",
+                    "Bandwidth",
+                    "SSB SCS",
+                    "Frequency",
+                    "ARFCN",
+                    "SCS",
+                ]
+                self.appliedSchema = self.initializeQuerySchema(
+                    NrDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getServingAndNeighbors()
+                )
 
             # CDMA/EVDO
             elif self.title == "CDMA/EVDO_Radio Parameters":
