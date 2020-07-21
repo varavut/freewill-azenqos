@@ -271,6 +271,9 @@ class Utils:
             for f in file_list:
                 if f == fileName:
                     layer.loadNamedStyle(file_folder_path + "/" + fileName)
+                    return True
+            return False
+        return False
 
     def openConnection(self, db: QSqlDatabase):
         if db:

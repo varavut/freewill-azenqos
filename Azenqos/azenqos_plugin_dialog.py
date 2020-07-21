@@ -145,11 +145,40 @@ class AzenqosDialog(QMainWindow):
                 layer.styleChanged.connect(self.handleStyleChange)
                 layer.rendererChanged.connect(self.handleStyleChange)
                 if layer.type() == layer.VectorLayer:
-                    Utils().loadLayerStyle(layer)
+                    isLoaded = Utils().loadLayerStyle(layer)
+                    if not isLoaded:
+                        # try:
+                        selectPattern = gc.graduatedFeatures[layer.name()]
+                        if selectPattern:
+                            self.initGraduatedPattern(layer, selectPattern)
+                        # except:
+                        #     pass
+                        # Check layer name in list of graduated layers
+                        # Init new graduated layer according to the provided document
 
-                # Force adding layer to root node
-                # cloneLayer = layer.clone()
-                # root.insertChildNode(0, cloneLayer)
+    def initGraduatedPattern(self, layer, graduatedPattern):
+        pass
+        ranges = []
+
+        if len(graduatedPattern["range"]) == 0:
+            pass
+        else:
+            for itemRange in graduatedPattern["range"]:
+                symbol = QgsSymbol.defaultSymbol(layer.geometryType())
+                symbol.setColor(QColor(itemRange["color"]))
+                rng = QgsRendererRange(
+                    itemRange["from"],
+                    itemRange["to"],
+                    symbol,
+                    "%d - %d" % (itemRange["from"], itemRange["to"]),
+                )
+                ranges.append(rng)
+
+        # create the renderer and assign it to a layer
+        expression = graduatedPattern["expression"]  # field name
+        renderer = QgsGraduatedSymbolRenderer(expression, ranges)
+        layer.setRenderer(renderer)
+        iface.mapCanvas().refresh()
 
     def handleStyleChange(self):
         layer = iface.activeLayer()
