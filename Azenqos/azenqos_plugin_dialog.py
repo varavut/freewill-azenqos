@@ -147,17 +147,16 @@ class AzenqosDialog(QMainWindow):
                 if layer.type() == layer.VectorLayer:
                     isLoaded = Utils().loadLayerStyle(layer)
                     if not isLoaded:
-                        # try:
-                        selectPattern = gc.graduatedFeatures[layer.name()]
-                        if selectPattern:
-                            self.initGraduatedPattern(layer, selectPattern)
-                        # except:
-                        #     pass
+                        try:
+                            selectPattern = gc.graduatedFeatures[layer.name()]
+                            if selectPattern:
+                                self.initGraduatedPattern(layer, selectPattern)
+                        except:
+                            pass
                         # Check layer name in list of graduated layers
                         # Init new graduated layer according to the provided document
 
     def initGraduatedPattern(self, layer, graduatedPattern):
-        pass
         ranges = []
 
         if len(graduatedPattern["range"]) == 0:
