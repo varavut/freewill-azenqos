@@ -102,6 +102,7 @@ class Ui_DatabaseDialog(QDialog):
                 self.azenqosMainMenu.killMainWindow()
                 self.clearCurrentProject()
             self.databasePath = Utils().unzipToFile(gc.CURRENT_PATH, self.fileName)
+            Utils().initTableViews(self.databasePath)
             self.addDatabase()
             if not gc.azenqosDatabase.open():
                 QtWidgets.QMessageBox.critical(

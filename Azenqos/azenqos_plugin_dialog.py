@@ -219,6 +219,7 @@ class AzenqosDialog(QMainWindow):
         if not layer:
             return False
         if layer.type() == layer.VectorLayer:
+
             for i in layer.selectedFeatures():
                 h = QgsHighlight(iface.mapCanvas(), i.geometry(), layer)
 
@@ -967,9 +968,14 @@ class AzenqosDialog(QMainWindow):
                     distance = f.geometry().distance(QgsGeometry.fromPointXY(point))
                     if distance != -1.0 and distance <= 0.001:
                         closestFeatureId = f.id()
-                        time = layer.getFeature(closestFeatureId).attribute("time")
-                        info = (layer, closestFeatureId, distance, time)
-                        layerData.append(info)
+                        time = None
+                        try:
+                            time = layer.getFeature(closestFeatureId).attribute("time")
+                        except:
+                            time = f["time"]
+                        if time:
+                            info = (layer, closestFeatureId, distance, time)
+                            layerData.append(info)
 
         if not len(layerData) > 0:
             # Looks like no vector layers were found - do nothing
@@ -1070,7 +1076,7 @@ class AzenqosDialog(QMainWindow):
                 continue
             query = QSqlQuery()
             queryString = (
-                "SELECT posid FROM %s WHERE time <= '%s' AND geom IS NOT NULL ORDER BY time DESC LIMIT 1"
+                "SELECT posid FROM '%s' WHERE time <= '%s' AND geom IS NOT NULL ORDER BY time DESC LIMIT 1"
                 % (tableName, gc.currentDateTimeString)
             )
             query.exec_(queryString)

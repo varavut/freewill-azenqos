@@ -35,7 +35,7 @@ threadpool = QThreadPool()
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 graduatedFeatures = {
     # 4G Section
-    "lte_inst_rsrp_1": {
+    "lte_cell_meas(lte_inst_rsrp_1)": {
         "expression": "lte_inst_rsrp_1",
         "range": [
             {"from": -150, "to": -124, "color": "#C0C0C0"},
@@ -48,7 +48,7 @@ graduatedFeatures = {
             {"from": -80, "to": 0, "color": "#0000FF"},
         ],
     },
-    "lte_inst_rsrq_1": {
+    "lte_cell_meas(lte_inst_rsrq_1)": {
         "expression": "lte_inst_rsrq_1",
         "range": [
             {"from": -20, "to": -14, "color": "#FF00FF"},
@@ -58,7 +58,7 @@ graduatedFeatures = {
             {"from": -6, "to": 0, "color": "#0000FF"},
         ],
     },
-    "lte_sinr_1": {
+    "lte_cell_meas(lte_sinr_1)": {
         "expression": "lte_sinr_1",
         "range": [
             {"from": -50, "to": 0, "color": "#FF00FF"},
@@ -69,8 +69,11 @@ graduatedFeatures = {
             {"from": 20, "to": 50, "color": "#0000FF"},
         ],
     },
-    "lte_physical_cell_id_1": {"expression": "lte_physical_cell_id_1", "range": []},
-    "lte_cqi_cw0_1": {
+    "lte_cell_meas(lte_physical_cell_id_1)": {
+        "expression": "lte_physical_cell_id_1",
+        "range": [],
+    },
+    "lte_cqi(lte_cqi_cw0_1)": {
         "expression": "lte_cqi_cw0_1",
         "range": [
             {"from": 0, "to": 6, "color": "#FF0000"},
@@ -78,7 +81,7 @@ graduatedFeatures = {
             {"from": 10, "to": 16, "color": "#0000FF"},
         ],
     },
-    "lte_l1_dl_throughput_all_carriers": {
+    "lte_l1_dl_tp(lte_l1_dl_throughput_all_carriers)": {
         "expression": "lte_l1_dl_throughput_all_carriers",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -92,7 +95,7 @@ graduatedFeatures = {
             {"from": 60000, "to": 100000, "color": "#351C75"},
         ],
     },
-    "lte_l1_ul_throughput_all_carriers_1": {
+    "lte_l1_ul_tp(lte_l1_ul_throughput_all_carriers_1)": {
         "expression": "lte_l1_ul_throughput_all_carriers_1",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -108,7 +111,7 @@ graduatedFeatures = {
         ],
     },
     # 3G Section
-    "wcdma_aset_rscp_1": {
+    "wcdma_cell_meas(wcdma_aset_rscp_1)": {
         "expression": "wcdma_aset_rscp_1",
         "range": [
             {"from": -150, "to": -103, "color": "#FF00FF"},
@@ -121,7 +124,7 @@ graduatedFeatures = {
             {"from": -65, "to": 0, "color": "#0000FF"},
         ],
     },
-    "wcdma_aset_ecio_1": {
+    "wcdma_cell_meas(wcdma_aset_ecio_1)": {
         "expression": "wcdma_aset_ecio_1",
         "range": [
             {"from": -30, "to": -18, "color": "#FF00FF"},
@@ -133,7 +136,7 @@ graduatedFeatures = {
             {"from": -6, "to": 0, "color": "#0000FF"},
         ],
     },
-    "wcdma_aset_sc_1": {"expression": "wcdma_aset_sc_1", "range": []},
+    "wcdma_cell_meas(wcdma_aset_sc_1)": {"expression": "wcdma_aset_sc_1", "range": []},
     "wcdma_n_aset_cells": {
         "expression": "wcdma_n_aset_cells",
         "range": [
@@ -142,7 +145,7 @@ graduatedFeatures = {
             {"from": 3, "to": 4, "color": "#FF0000"},
         ],
     },
-    "data_hsdpa_thoughput": {
+    "wcdma_hsdpa_stats(data_hsdpa_thoughput)": {
         "expression": "data_hsdpa_thoughput",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -158,7 +161,7 @@ graduatedFeatures = {
             {"from": 42000, "to": 100000, "color": "#351C75"},
         ],
     },
-    "data_hsupa_total_e_dpdch_throughput": {
+    "wcdma_hsdpa_stats(data_hsupa_total_e_dpdch_throughput)": {
         "expression": "data_hsupa_total_e_dpdch_throughput",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -174,7 +177,7 @@ graduatedFeatures = {
         ],
     },
     # 2G Section
-    "gsm_rxlev_full_dbm": {
+    "gsm_cell_meas(gsm_rxlev_full_dbm)": {
         "expression": "gsm_rxlev_full_dbm",
         "range": [
             {"from": -120, "to": -92, "color": "#FF0000"},
@@ -184,7 +187,7 @@ graduatedFeatures = {
             {"from": -65, "to": 0, "color": "#0000FF"},
         ],
     },
-    "gsm_rxlev_sub_dbm": {
+    "gsm_cell_meas(gsm_rxlev_sub_dbm)": {
         "expression": "gsm_rxlev_sub_dbm",
         "range": [
             {"from": -120, "to": -92, "color": "#FF0000"},
@@ -194,7 +197,7 @@ graduatedFeatures = {
             {"from": -65, "to": 0, "color": "#0000FF"},
         ],
     },
-    "gsm_rxqual_full": {
+    "gsm_cell_meas(gsm_rxqual_full)": {
         "expression": "gsm_rxqual_full",
         "range": [
             {"from": 0, "to": 4, "color": "#0000FF"},
@@ -202,7 +205,7 @@ graduatedFeatures = {
             {"from": 6, "to": 10, "color": "#FF0000"},
         ],
     },
-    "gsm_rxqual_sub": {
+    "gsm_cell_meas(gsm_rxqual_sub)": {
         "expression": "gsm_rxqual_sub",
         "range": [
             {"from": 0, "to": 4, "color": "#0000FF"},
@@ -210,7 +213,7 @@ graduatedFeatures = {
             {"from": 6, "to": 10, "color": "#FF0000"},
         ],
     },
-    "gsm_coi_worst": {
+    "gsm_coi_per_chan(gsm_coi_worst)": {
         "expression": "gsm_coi_worst",
         "range": [
             {"from": 0, "to": 6, "color": "#FF0000"},
@@ -220,8 +223,8 @@ graduatedFeatures = {
             {"from": 12, "to": 30, "color": "#0000FF"},
         ],
     },
-    "gsm_arfcn_bcch": {"expression": "gsm_arfcn_bcch", "range": []},
-    "data_gsm_rlc_dl_throughput": {
+    "gsm_cell_meas(gsm_arfcn_bcch)": {"expression": "gsm_arfcn_bcch", "range": []},
+    "data_egprs_stats(data_gsm_rlc_dl_throughput)": {
         "expression": "data_gsm_rlc_dl_throughput",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -230,7 +233,7 @@ graduatedFeatures = {
             {"from": 128, "to": 1000, "color": "#00FF00"},
         ],
     },
-    "data_gsm_rlc_ul_throughput": {
+    "data_egprs_stats(data_gsm_rlc_ul_throughput)": {
         "expression": "data_gsm_rlc_ul_throughput",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -240,7 +243,7 @@ graduatedFeatures = {
         ],
     },
     # Others
-    "data_trafficstat_dl": {
+    "android_info_1sec(data_trafficstat_dl)": {
         "expression": "data_trafficstat_dl",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -254,7 +257,7 @@ graduatedFeatures = {
             {"from": 60000, "to": 100000, "color": "#351C75"},
         ],
     },
-    "data_trafficstat_ul": {
+    "android_info_1sec(data_trafficstat_ul)": {
         "expression": "data_trafficstat_ul",
         "range": [
             {"from": -1, "to": 0, "color": "#C0C0C0"},
@@ -269,7 +272,7 @@ graduatedFeatures = {
             {"from": 6000, "to": 300000, "color": "#0000FF"},
         ],
     },
-    "polqa_mos": {
+    "polqa_mos(polqa_mos)": {
         "expression": "polqa_mos",
         "range": [
             {"from": 0, "to": 1, "color": "#C0C0C0"},

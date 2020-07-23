@@ -107,6 +107,83 @@ class Utils:
     def __init__(self):
         super().__init__()
 
+    def initTableViews(self, dbPath):
+        baseColumns = "time,modem_time,posid,seqid,netid,geom"
+        specialKeys = [
+            "lte_inst_rsrp_1",
+            "lte_inst_rsrq_1",
+            "lte_sinr_1",
+            "lte_physical_cell_id_1",
+            "lte_cqi_cw0_1",
+            "lte_l1_dl_throughput_all_carriers",
+            "lte_l1_ul_throughput_all_carriers_1",
+            "wcdma_aset_rscp_1",
+            "wcdma_aset_ecio_1",
+            "wcdma_aset_sc_1",
+            "wcdma_n_aset_cells",
+            "data_hsdpa_thoughput",
+            "data_hsupa_total_e_dpdch_throughput",
+            "gsm_rxlev_full_dbm",
+            "gsm_rxlev_sub_dbm",
+            "gsm_rxqual_full",
+            "gsm_rxqual_sub",
+            "gsm_coi_worst",
+            "gsm_arfcn_bcch",
+            "data_gsm_rlc_dl_throughput",
+            "data_gsm_rlc_ul_throughput",
+            "data_trafficstat_dl",
+            "data_trafficstat_ul",
+            "polqa_mos",
+        ]
+        db = QSqlDatabase.addDatabase("QSQLITE")
+        db.setDatabaseName(dbPath)
+        queryString = "SELECT name FROM sqlite_master"
+        tableList = []
+
+        if not db.isOpen():
+            db.open()
+
+        # START Get table name
+        query = QSqlQuery()
+        query.exec_(queryString)
+        nameField = query.record().indexOf("name")
+
+        while query.next():
+            nameValue = query.value(nameField)
+            tableList.append(nameValue)
+        # END Get table name
+
+        # START Creating View
+        for tableName in tableList:
+            fieldList = []
+            queryString = 'select name from pragma_table_info("%s")' % (tableName)
+            query.exec_(queryString)
+            nameField = query.record().indexOf("name")
+
+            while query.next():
+                nameValue = query.value(nameField)
+                if nameValue in specialKeys:
+                    newTableName = "%s(%s)" % (tableName, nameValue)
+                    # queryString = "CREATE VIEW '%s' AS SELECT * FROM %s" % (newTableName, tableName)
+                    query2 = QSqlQuery()
+                    queryString = "CREATE TABLE '%s' AS SELECT %s,%s FROM '%s'" % (
+                        newTableName,
+                        baseColumns,
+                        nameValue,
+                        tableName,
+                    )
+                    query2.exec_(queryString)
+                    queryString = (
+                        "INSERT INTO geometry_columns(f_table_name, f_geometry_column, type, coord_dimension, srid, spatial_index_enabled) VALUES('%s', 'geom', 'POINT', 2, 4326, 0)"
+                        % newTableName
+                    )
+                    query2.exec_(queryString)
+        # END Creating View
+
+        db.close()
+
+        pass
+
     def unzipToFile(self, currentPath, filePath):
         file_folder_path = currentPath + "/file"
         if not os.path.exists(file_folder_path):
