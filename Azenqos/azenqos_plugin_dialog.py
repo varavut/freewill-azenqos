@@ -719,6 +719,13 @@ class AzenqosDialog(QMainWindow):
                 "<b>Map Selection Tool</b><br> Use to <i>select</i> feature on map",
             )
         )
+        self.layerSelect.setText(_translate("AzenqosDialog", "Add Layers"))
+        self.layerSelect.setToolTip(
+            _translate(
+                "AzenqosDialog",
+                "<b>Add Layers</b><br> Select and import selected layer(s) to display on map interface",
+            )
+        )
         self.playButton.setToolTip(
             _translate(
                 "AzenqosDialog",

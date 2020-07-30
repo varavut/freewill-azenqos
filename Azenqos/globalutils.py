@@ -222,7 +222,14 @@ class Utils:
             saveEntities = {}
             winList = []
             for window in gc.openedWindows:
-                winList.append(str(window.title))
+                windowProperties = {
+                    "windowTitle": str(window.title),
+                    "displayTitle": window.windowTitle(),
+                    "customData": window.customData,
+                    "customHeader": window.customHeader,
+                    "appliedSchema": window.appliedSchema,
+                }
+                winList.append(windowProperties)
 
             saveEntities["windows"] = winList
             saveEntities["timestamp"] = gc.currentTimestamp
@@ -237,7 +244,14 @@ class Utils:
             saveEntities = {}
             winList = []
             for window in gc.openedWindows:
-                winList.append(str(window.title))
+                windowProperties = {
+                    "windowTitle": str(window.title),
+                    "displayTitle": window.windowTitle(),
+                    "customData": window.customData,
+                    "customHeader": window.customHeader,
+                    "appliedSchema": window.appliedSchema,
+                }
+                winList.append(windowProperties)
 
             saveEntities["windows"] = winList
             saveEntities["timestamp"] = gc.currentTimestamp
@@ -267,8 +281,17 @@ class Utils:
         if loadedEntities:
             loadedTimestamp = None
             for window in loadedEntities["windows"]:
-                name = window.split("_")
+                name = window["windowTitle"].split("_")
                 dialog.classifySelectedItems(name[0], name[1])
+                try:
+                    newWindow = gc.openedWindows[len(gc.openedWindows) - 1]
+                    newWindow.customData = window["customData"]
+                    newWindow.customHeader = window["customHeader"]
+                    newWindow.appliedSchema = window["appliedSchema"]
+                    newWindow.setWindowTitle(window["displayTitle"])
+                    newWindow.queryFromSchema()
+                except:
+                    continue
 
             try:
                 loadedTimestamp = float(loadedEntities["timestamp"])
@@ -306,8 +329,17 @@ class Utils:
         if loadedEntities:
             loadedTimestamp = None
             for window in loadedEntities["windows"]:
-                name = window.split("_")
+                name = window["windowTitle"].split("_")
                 dialog.classifySelectedItems(name[0], name[1])
+                try:
+                    newWindow = gc.openedWindows[len(gc.openedWindows) - 1]
+                    newWindow.customData = window["customData"]
+                    newWindow.customHeader = window["customHeader"]
+                    newWindow.appliedSchema = window["appliedSchema"]
+                    newWindow.setWindowTitle(window["displayTitle"])
+                    newWindow.queryFromSchema()
+                except:
+                    continue
 
             try:
                 loadedTimestamp = float(loadedEntities["timestamp"])

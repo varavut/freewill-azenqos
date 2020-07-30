@@ -131,7 +131,7 @@ class PropertiesWindow(QWidget):
         sizePolicy.setHeightForWidth(self.ledtTitle.sizePolicy().hasHeightForWidth())
         self.ledtTitle.setSizePolicy(sizePolicy)
         self.ledtTitle.setObjectName("ledtTitle")
-        self.ledtTitle.setText(self.main_window.title)
+        self.ledtTitle.setText(self.main_window.windowTitle())
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.ledtTitle)
 
         self.lblRow = QLabel(self.formLayoutWidget)
