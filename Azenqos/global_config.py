@@ -72,6 +72,7 @@ graduatedFeatures = {
     "lte_cell_meas(lte_physical_cell_id_1)": {
         "expression": "lte_physical_cell_id_1",
         "range": [],
+        "table": "lte_cell_meas"
     },
     "lte_cqi(lte_cqi_cw0_1)": {
         "expression": "lte_cqi_cw0_1",
@@ -136,7 +137,7 @@ graduatedFeatures = {
             {"from": -6, "to": 0, "color": "#0000FF"},
         ],
     },
-    "wcdma_cell_meas(wcdma_aset_sc_1)": {"expression": "wcdma_aset_sc_1", "range": []},
+    "wcdma_cell_meas(wcdma_aset_sc_1)": {"expression": "wcdma_aset_sc_1", "range": [], "table": "wcdma_cell_meas"},
     "wcdma_n_aset_cells": {
         "expression": "wcdma_n_aset_cells",
         "range": [
@@ -223,7 +224,7 @@ graduatedFeatures = {
             {"from": 12, "to": 30, "color": "#0000FF"},
         ],
     },
-    "gsm_cell_meas(gsm_arfcn_bcch)": {"expression": "gsm_arfcn_bcch", "range": []},
+    "gsm_cell_meas(gsm_arfcn_bcch)": {"expression": "gsm_arfcn_bcch", "range": [], "table": "gsm_cell_meas"},
     "data_egprs_stats(data_gsm_rlc_dl_throughput)": {
         "expression": "data_gsm_rlc_dl_throughput",
         "range": [

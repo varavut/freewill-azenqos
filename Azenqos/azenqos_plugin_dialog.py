@@ -160,7 +160,35 @@ class AzenqosDialog(QMainWindow):
         ranges = []
 
         if len(graduatedPattern["range"]) == 0:
-            pass
+            gc.azenqosDatabase.open()
+            result = []
+            queryString = "SELECT %s FROM '%s'" % (graduatedPattern["expression"],graduatedPattern["table"])
+            query = QSqlQuery()
+            query.exec_(queryString)
+            while(query.next()):
+                result.append(str(query.value(0)))
+
+            #distinct result
+            result = list(set(result))
+            result.sort(reverse=True)
+            result.remove("NULL")
+            for itemRange in result:
+
+                if itemRange == "NULL":
+                    continue
+
+                itemRange = int(itemRange)
+                symbol = QgsSymbol.defaultSymbol(layer.geometryType())
+                symbol.setColor(QColor(get_default_color_for_index(itemRange)))
+                rng = QgsRendererRange(
+                    itemRange,
+                    itemRange,
+                    symbol,
+                    "%d" % (itemRange),
+                )
+                ranges.append(rng)
+
+            gc.azenqosDatabase.close()
         else:
             for itemRange in graduatedPattern["range"]:
                 symbol = QgsSymbol.defaultSymbol(layer.geometryType())
