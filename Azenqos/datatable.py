@@ -154,6 +154,10 @@ class TableWindow(QWidget):
         self.tableView.setModel(self.proxyModel)
         self.tableView.setSortingEnabled(True)
 
+        font = self.tableView.font()
+        font.setPointSize(8)
+        self.tableView.setFont(font)
+
         if not self.rows:
             self.rows = self.tableModel.rowCount(self)
             self.fetchRows = self.rows

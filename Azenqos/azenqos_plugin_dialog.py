@@ -162,13 +162,17 @@ class AzenqosDialog(QMainWindow):
         if len(graduatedPattern["range"]) == 0:
             gc.azenqosDatabase.open()
             result = []
-            queryString = "SELECT %s FROM '%s' WHERE %s IS NOT NULL" % (graduatedPattern["expression"],graduatedPattern["table"],graduatedPattern["expression"])
+            queryString = "SELECT %s FROM '%s' WHERE %s IS NOT NULL" % (
+                graduatedPattern["expression"],
+                graduatedPattern["table"],
+                graduatedPattern["expression"],
+            )
             query = QSqlQuery()
             query.exec_(queryString)
-            while(query.next()):
+            while query.next():
                 result.append(query.value(0))
 
-            #distinct result
+            # distinct result
             result = list(set(result))
             result.sort(reverse=True)
             for itemRange in result:
@@ -176,10 +180,7 @@ class AzenqosDialog(QMainWindow):
                 symbol = QgsSymbol.defaultSymbol(layer.geometryType())
                 symbol.setColor(QColor(get_default_color_for_index(itemRange)))
                 rng = QgsRendererRange(
-                    itemRange,
-                    itemRange,
-                    symbol,
-                    "%d" % (itemRange),
+                    itemRange, itemRange, symbol, "%d" % (itemRange),
                 )
                 ranges.append(rng)
 
