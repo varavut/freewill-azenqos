@@ -1,5 +1,9 @@
 from PyQt5.QtSql import QSqlQuery, QSqlDatabase
 import re
+import sqlite3
+import pandas as pd
+import global_config as gc
+import params_disp_df
 
 
 class NrDataQuery:
@@ -199,6 +203,8 @@ class NrDataQuery:
         elementDictList.append(
             {"name": "Detected:", "column": [], "table": "nr_cell_meas",}
         )
+    ]            
+    return params_disp_df.get(dbcon, parameter_to_columns_list, time_before, default_table="nr_cell_meas", not_null_first_col=True, custom_lookback_dur_millis=gc.DEFAULT_LOOKBACK_DUR_MILLIS)
 
         for detected in range(MAX_DETECTED):
             detectedNo = detected + 1

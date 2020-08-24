@@ -1,12 +1,16 @@
 import os
 from PyQt5.QtCore import *
+from PyQt5 import QtCore
 
+DEFAULT_LOOKBACK_DUR_MILLIS = 2000
 maxColumns = 50
 maxRows = 1000
 schemaList = []
 activeLayers = []
 mostFeaturesLayer = None
 azenqosDatabase = None
+databasePath = None
+dbcon = None
 minTimeValue = None
 maxTimeValue = None
 fastForwardValue = 1
@@ -292,3 +296,4 @@ graduatedFeatures = {
         ],
     },
 }
+

@@ -261,6 +261,7 @@ class Utils:
         return True
 
     def loadState(self, currentPath, dialog):
+        print("%s: loadState start" % os.path.basename(__file__))
         textString = ""
         loadedEntities = None
         file_path = currentPath + "/save.azs"
@@ -309,6 +310,7 @@ class Utils:
         return False
 
     def loadStateFromFile(self, currentPath, dialog):
+        print("%s: loadStateFromFile start" % os.path.basename(__file__))
         textString = ""
         loadedEntities = None
         file_path = currentPath
@@ -385,16 +387,19 @@ class Utils:
         return False
 
     def openConnection(self, db: QSqlDatabase):
+        print("%s: openConnection" % os.path.basename(__file__))
         if db:
             if not db.isOpen():
                 db.open()
 
     def closeConnection(self, db: QSqlDatabase):
+        print("%s: closeConnection" % os.path.basename(__file__))
         if db:
             if db.isOpen():
                 db.close()
 
     def datetimeStringtoTimestamp(self, datetimeString: str):
+        print("%s: datetimestringtotimestamp" % os.path.basename(__file__))
         try:
             element = datetime.datetime.strptime(datetimeString, "%Y-%m-%d %H:%M:%S.%f")
             timestamp = datetime.datetime.timestamp(element)
