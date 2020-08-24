@@ -225,9 +225,9 @@ class Utils:
                 windowProperties = {
                     "windowTitle": str(window.title),
                     "displayTitle": window.windowTitle(),
-                    "customData": window.customData,
-                    "customHeader": window.customHeader,
-                    "appliedSchema": window.appliedSchema,
+                    "customData": hasattr(window, 'customData') and window.customData or None,
+                    "customHeader": hasattr(window, 'customHeader') and window.customHeader or None,
+                    "appliedSchema": hasattr(window, 'appliedSchema') and window.appliedSchema or None,
                 }
                 winList.append(windowProperties)
 
@@ -247,9 +247,9 @@ class Utils:
                 windowProperties = {
                     "windowTitle": str(window.title),
                     "displayTitle": window.windowTitle(),
-                    "customData": window.customData,
-                    "customHeader": window.customHeader,
-                    "appliedSchema": window.appliedSchema,
+                    "customData": hasattr(window, 'customData') and window.customData or None,
+                    "customHeader": hasattr(window, 'customHeader') and window.customHeader or None,
+                    "appliedSchema": hasattr(window, 'appliedSchema') and window.appliedSchema or None,
                 }
                 winList.append(windowProperties)
 
