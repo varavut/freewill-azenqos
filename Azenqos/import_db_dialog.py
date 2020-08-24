@@ -108,11 +108,11 @@ class Ui_DatabaseDialog(QDialog):
                 self.azenqosMainMenu.newImport = True
                 self.azenqosMainMenu.killMainWindow()
                 self.clearCurrentProject()
-            self.databasePath = Utils().unzipToFile(gc.CURRENT_PATH, self.fileName)
+            self.databasePath = Utils().unzipToFile(gc.CURRENT_PATH, self.dbPath.text())
             Utils().initTableViews(self.databasePath)
             gc.databasePath = self.databasePath
-            dbcon = self.addDatabase()
-            if not dbcon or not gc.azenqosDatabase.open():
+            self.addDatabase()
+            if not gc.dbcon or not gc.azenqosDatabase.open():
                 QtWidgets.QMessageBox.critical(
                     None,
                     "Cannot open database",
@@ -189,7 +189,6 @@ class Ui_DatabaseDialog(QDialog):
         assert os.path.isfile(self.databasePath)
         ret = sqlite3.connect(self.databasePath)
         gc.dbcon = ret
-        return ret
 
     def getLayersFromDb(self):
         gc.azenqosDatabase.open()

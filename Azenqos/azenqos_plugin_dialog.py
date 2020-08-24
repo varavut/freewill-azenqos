@@ -1149,7 +1149,9 @@ class AzenqosDialog(QMainWindow):
 
     def getPosIdsByTable(self):
         print("%s: getPosIdsByTable" % os.path.basename(__file__))
-        gc.azenqosDatabase.open()
+        dbconn = QSqlDatabase.addDatabase("QSQLITE")
+        dbconn.setDatabaseName(gc.databasePath)
+        dbconn.open()
         # start_time = time.time()
         QgsMessageLog.logMessage("tables: " + str(gc.tableList))
         self.posObjs = []
@@ -1174,8 +1176,9 @@ class AzenqosDialog(QMainWindow):
                 self.posIds.append(posid)
         # elapsed_time = time.time() - start_time
         # QgsMessageLog.logMessage('Query Elapsed time: ' + str(elapsed_time) + ' s.')
-        gc.azenqosDatabase.close()
-
+        dbconn.close()
+        del dbconn
+        
     def usePosIdsSelectedFeatures(self):
         print("%s: usePosIdsSelectedFeatures" % os.path.basename(__file__))
         if self.posIds:

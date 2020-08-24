@@ -3,6 +3,7 @@ import threading
 import sys
 import os
 import pandas as pd
+import sqlite3
 
 # Adding folder path
 sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
@@ -600,6 +601,7 @@ class TableWindow(QWidget):
         return activeSchema
 
     def queryFromSchema(self):
+        print("queryFromSchema")
         self.dataList = []
         for r in range(self.rows):
             content = []
@@ -607,12 +609,14 @@ class TableWindow(QWidget):
                 content.append("")
             self.dataList.append(content)
 
-        result = CustomizeQuery(
-            gc.azenqosDatabase, self.appliedSchema, self, gc.currentDateTimeString
-        ).query()
+        customQuery = CustomizeQuery(
+            self,gc.azenqosDatabase, self.appliedSchema, self, gc.currentDateTimeString
+        )
+        result = customQuery.query()
+
         for data in result:
             self.dataList[data[1]][data[2]] = data[0]
-
+        print(result)
         self.updateTable()
 
     def setHeader(self, headers):
@@ -646,7 +650,7 @@ class TableWindow(QWidget):
             "Signaling_Layer 1 Messages",
             "Signaling_Layer 3 Messages",
         ]:
-            worker = Worker(self.queryFromSchema())
+            worker = Worker(self.queryFromSchema)
         else:
             worker = Worker(self.findCurrentRow)
 
@@ -816,7 +820,8 @@ class TableModel(QAbstractTableModel):
 
 
 class CustomizeQuery:
-    def __init__(self, database, inputData: list, window, globalTime: str):
+    def __init__(self,parent, database, inputData: list, window, globalTime: str):
+        self.parent = parent
         self.db = database
         self.inputData = inputData[:]
         self.tableWindow = window
@@ -912,23 +917,29 @@ class CustomizeQuery:
         if not self.db.isOpen():
             self.db.open()
 
-        query = QSqlQuery()
-        query.exec_(queryAll)
+        # query = QSqlQuery()
+        # query.exec(queryAll)
+        # print(query.first())
+        conn = sqlite3.connect(gc.databasePath)
+        cursor = conn.execute(queryAll)
+        records = cursor.fetchall()
         field_key = lambda x: x["field"]
-        if query.first():
-            for i in range(len(self.inputData)):
-                output = [
-                    str(query.value(i)),
-                    self.inputData[i]["row"],
-                    self.inputData[i]["column"],
-                ]
-                result.append(output)
+
+        if len(records) > 0:
+            for record in records:
+                for i in range(len(record)):
+                    output = [
+                        str(record[i]),
+                        self.inputData[i]["row"],
+                        self.inputData[i]["column"],
+                    ]
+                    result.append(output)
         else:
             for i in range(len(self.inputData)):
                 output = ["", self.inputData[i]["row"], self.inputData[i]["column"]]
                 result.append(output)
-        self.db.close()
-
+        conn.close()
+        print(result)
         return result
 
 
