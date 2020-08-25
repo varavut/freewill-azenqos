@@ -1134,7 +1134,7 @@ class AzenqosDialog(QMainWindow):
     #     QgsMessageLog.logMessage('[-- THREAD COMPLETE --]')
     #     iface.mapCanvas().refresh()
 
-    def hilightFeature(self, time_mode=True):
+    def hilightFeature(self, time_mode=False):
         if time_mode:
             self.selectFeatureOnLayersByTime()
         else:

@@ -171,6 +171,7 @@ class NrDataQuery:
         return elementDictList
 
     def getServingAndNeighbors(self):
+        df_list = []
         MAX_SERVING = 8
         MAX_DETECTED = 10
 
@@ -219,12 +220,11 @@ class NrDataQuery:
             }
             elementDictList.append(detectedElement)
 
-    ]
-    dcell_df = params_disp_df.get(dbcon, dparameter_to_columns_list, time_before, default_table="nr_cell_meas", not_null_first_col=True, custom_lookback_dur_millis=gc.DEFAULT_LOOKBACK_DUR_MILLIS)
-    #print("0dcell_df.head():\n%s" % dcell_df.head())
-    dcell_df.columns = ["CellGroup"]+dcell_col_renamed
-    #print("dcell_df.head():\n%s" % dcell_df.head())
-    df_list.append(dcell_df)
+        dcell_df = params_disp_df.get(dbcon, dparameter_to_columns_list, time_before, default_table="nr_cell_meas", not_null_first_col=True, custom_lookback_dur_millis=gc.DEFAULT_LOOKBACK_DUR_MILLIS)
+        #print("0dcell_df.head():\n%s" % dcell_df.head())
+        dcell_df.columns = ["CellGroup"]+dcell_col_renamed
+        #print("dcell_df.head():\n%s" % dcell_df.head())
+        df_list.append(dcell_df)
 
         # DET_PARAMS = [
         #     (COL_PCI, re.compile(r"nr_detectedbeam(\d+)_pci(?:_1)")),
