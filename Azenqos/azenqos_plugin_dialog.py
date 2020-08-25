@@ -124,12 +124,13 @@ class AzenqosDialog(QMainWindow):
     def renamingLayers(self, layers):
 
         # Configure layers data source + rename layers
-        uri = QgsDataSourceUri()
-        uri.setDatabase(self.databaseUi.databasePath)
+        #uri = QgsDataSourceUri()
+        #uri.setDatabase(self.databaseUi.databasePath)
         root = QgsProject.instance().layerTreeRoot()
         treeGroups = root.findGroups()
         geom_column = "geom"
         for layer in layers:
+            print("renamingLayers: ", layer.name())
             name = layer.name().split(" ")
             if name[0] == "azqdata":
 
@@ -148,8 +149,8 @@ class AzenqosDialog(QMainWindow):
                 # Setting up layer data source
                 layer.setName(" ".join(name[1:]))
                 gc.activeLayers.append(" ".join(name[1:]))
-                uri.setDataSource("", " ".join(name[1:]), geom_column)
-                layer.setDataSource(uri.uri(), " ".join(name[1:]), "spatialite")
+                #uri.setDataSource("", " ".join(name[1:]), geom_column)
+                #layer.setDataSource(uri.uri(), " ".join(name[1:]), "spatialite")
 
                 # Handling layer customize style
                 layer.styleChanged.connect(self.handleStyleChange)
@@ -981,45 +982,41 @@ class AzenqosDialog(QMainWindow):
             if not layer:
                 continue
 
-            # if layer.type() == layer.VectorLayer:
-            #     if layer.featureCount() == 0:
-            #         # There are no features - skip
-            #         continue
-
-            #     # Loop through all features in the layer
-            #     for f in layer.getFeatures():
-            #         distance = -1.0
-
-            #         if f.geometry():
-            #             featurePoint = f.geometry().asPoint()
-            #             featurePoint = self.canvas.getCoordinateTransform().toMapCoordinates(
-            #                 featurePoint.x(), featurePoint.y()
-            #             )
-            #             distance = featurePoint.distance(point)
-            #         if distance != -1.0 and distance <= 0.005:
-            #             closestFeatureId = f.id()
-            #             time = layer.getFeature(closestFeatureId).attribute("time")
-            #             info = (layer, closestFeatureId, distance, time)
-            #             layerData.append(info)
-
             if layer.type() == layer.VectorLayer:
                 if layer.featureCount() == 0:
                     # There are no features - skip
                     continue
+                print("layer.name()", layer.name())
 
+
+                # Loop through all features in a rect near point xy
+                offset = 0.0005
+                p1 = QgsPointXY(point.x() - offset, point.y() - offset)
+                p2 = QgsPointXY(point.x() + offset, point.y() + offset)
+                rect = QgsRectangle(p1, p2)
+                nearby_features = layer.getFeatures(rect)                
+                for f in nearby_features:
+                    distance = f.geometry().distance(QgsGeometry.fromPointXY(point))
+                    if distance != -1.0 and distance <= 0.001:
+                        closestFeatureId = f.id()
+                        time = layer.getFeature(closestFeatureId).attribute("time")
+                        info = (layer, closestFeatureId, distance, time)
+                        layerData.append(info)
+
+
+                '''
                 # Loop through all features in the layer
                 for f in layer.getFeatures():
                     distance = f.geometry().distance(QgsGeometry.fromPointXY(point))
                     if distance != -1.0 and distance <= 0.001:
                         closestFeatureId = f.id()
-                        time = None
-                        try:
-                            time = layer.getFeature(closestFeatureId).attribute("time")
-                        except:
-                            time = f["time"]
-                        if time:
-                            info = (layer, closestFeatureId, distance, time)
-                            layerData.append(info)
+                        cf = layer.getFeature(closestFeatureId)
+                        print("cf.attributes:", cf.attributes())
+                        print("cf.fields:", cf.fields().toList())
+                        time = cf.attribute("time")
+                        info = (layer, closestFeatureId, distance, time)
+                        layerData.append(info)
+                '''
 
         if not len(layerData) > 0:
             # Looks like no vector layers were found - do nothing
@@ -1032,7 +1029,6 @@ class AzenqosDialog(QMainWindow):
             # layer.select(closestFeatureId)
             selectedTime = time
             break
-
         try:
             selectedTimestamp = Utils().datetimeStringtoTimestamp(
                 selectedTime.toString("yyyy-MM-dd HH:mm:ss.zzz")
@@ -1138,22 +1134,83 @@ class AzenqosDialog(QMainWindow):
     #     QgsMessageLog.logMessage('[-- THREAD COMPLETE --]')
     #     iface.mapCanvas().refresh()
 
-    def hilightFeature(self):
-        print("%s: hilightFeature" % os.path.basename(__file__))
-        QgsMessageLog.logMessage("[-- Start hilight features --]")
-        start_time = time.time()
-        self.getPosIdsByTable()
-        if len(self.posIds) > 0 and len(self.posObjs) > 0:
-            self.usePosIdsSelectedFeatures()
-        QgsMessageLog.logMessage("[-- End hilight features --]")
+    def hilightFeature(self, time_mode=True):
+        if time_mode:
+            self.selectFeatureOnLayersByTime()
+        else:
+            print("%s: hilightFeature" % os.path.basename(__file__))
+            QgsMessageLog.logMessage("[-- Start hilight features --]")
+            start_time = time.time()
+            self.getPosIdsByTable()
+            if len(self.posIds) > 0 and len(self.posObjs) > 0:
+                self.usePosIdsSelectedFeatures()
+            QgsMessageLog.logMessage("[-- End hilight features --]")
 
+    def selectFeatureOnLayersByTime(self):
+        root = QgsProject.instance().layerTreeRoot()
+        layers = root.findLayers()
+        for layer in layers:
+            if layer.name() not in gc.activeLayers:
+                continue
+            try:
+                print("selectFeatureOnLayersByTime layer: %s" % layer.name())
+                end_dt = datetime.datetime.fromtimestamp(gc.currentTimestamp)
+                start_dt = end_dt - datetime.timedelta(seconds=(gc.DEFAULT_LOOKBACK_DUR_MILLIS/1000.0))
+                # 2020-10-08 15:35:55.431000
+                filt_expr = "time >= '%s' and time <= '%s'" % (start_dt, end_dt)
+                print("filt_expr:", filt_expr)
+                request = (
+                    QgsFeatureRequest()
+                    .setFilterExpression(filt_expr)
+                    .setFlags(QgsFeatureRequest.NoGeometry)
+                )
+
+                layerFeatures = layer.layer().getFeatures(request)
+                print("filt request ret:", layerFeatures)
+                lc = 0
+                fids = []
+                time_list = []
+                for lf in layerFeatures:
+                    lc += 1
+                    fids.append(lf.id())
+                    time_list.append(lf.attribute("time"))
+                if len(fids):
+                    sr = pd.Series(time_list, index=fids, dtype='datetime64[ns]')
+                    sids = [sr.idxmax()]
+                    print("sr:", sr)
+                    print("select ids:", sids)
+                    layer.layer().selectByIds(sids)
+            except:
+                type_, value_, traceback_ = sys.exc_info()
+                exstr = str(traceback.format_exception(type_, value_, traceback_))
+                print("WARNING: selectFeatureOnLayersByTime layer.name() {} exception: {}".format(layer.name(), exstr))
+            '''
+            root = QgsProject.instance().layerTreeRoot()
+            root.setHasCustomLayerOrder(True)
+            order = root.customLayerOrder()
+            order.insert(0, order.pop(order.index(layer)))  # vlayer to the top
+            root.setCustomLayerOrder(order)
+            iface.setActiveLayer(layer)
+
+            for feature in layerFeatures:
+                posid = feature["posid"]
+                if self.currentMaxPosId == posid:
+                    selected_ids.append(feature.id())
+            QgsMessageLog.logMessage("selected_ids: {0}".format(str(selected_ids)))
+
+            if layer is not None:
+                if len(selected_ids) > 0:
+                    layer.selectByIds(selected_ids, QgsVectorLayer.SetSelection)
+            '''
+
+                        
     def getPosIdsByTable(self):
         print("%s: getPosIdsByTable" % os.path.basename(__file__))
         dbconn = QSqlDatabase.addDatabase("QSQLITE")
         dbconn.setDatabaseName(gc.databasePath)
         dbconn.open()
         # start_time = time.time()
-        QgsMessageLog.logMessage("tables: " + str(gc.tableList))
+        #QgsMessageLog.logMessage("tables: " + str(gc.tableList))
         self.posObjs = []
         self.posIds = []
         for tableName in gc.activeLayers:
@@ -2616,7 +2673,7 @@ class AzenqosDialog(QMainWindow):
 
             QgsProject.instance().reloadAllLayers()
             QgsProject.instance().clear()
-            gc.tableList = []
+            #gc.tableList = []
             gc.activeLayers = []
 
             if len(gc.openedWindows) > 0:

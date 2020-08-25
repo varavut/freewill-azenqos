@@ -94,7 +94,7 @@ class TableWindow(QWidget):
             QTableCornerButton::section{border-width: 0px; border-color: #BABABA; border-style:solid;}
             """
         )
-        self.specifyTablesHeader()
+        self.refreshTableContents()
 
         # Attach header to table, create text filter
         self.tableView.setHorizontalHeader(self.filterHeader)
@@ -188,7 +188,7 @@ class TableWindow(QWidget):
             self.rowCount = sizelist[0]
             self.columnCount = sizelist[1]
 
-    def specifyTablesHeader(self):
+    def refreshTableContents(self):
         if self.title is not None:
             # GSM
             if self.title == "GSM_Radio Parameters":

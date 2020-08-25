@@ -219,20 +219,12 @@ class NrDataQuery:
             }
             elementDictList.append(detectedElement)
 
-        # SER_PARAMS = [
-        #     (COL_PCI, re.compile(r"nr_servingbeam_pci_(\d+)")),
-        #     (COL_BEAM_ID, re.compile(r"nr_servingbeam_ssb_index_(\d+)")),
-        #     (COL_RSRP, re.compile(r"nr_servingbeam_ss_rsrp_(\d+)")),
-        #     (COL_RSRQ, re.compile(r"nr_servingbeam_ss_rsrq_(\d+)")),
-        #     (COL_SINR, re.compile(r"nr_servingbeam_ss_sinr_(\d+)")),
-        #     (COL_BAND, re.compile(r"nr_band_(\d+)")),
-        #     (COL_BAND_TYPE, re.compile(r"nr_band_type_(\d+)")),
-        #     (COL_BANDWIDTH, re.compile(r"nr_bw_(\d+)")),
-        #     (COL_SSB_SCS, re.compile(r"nr_ssb_scs_(\d+)")),
-        #     (COL_DL_FREQ, re.compile(r"nr_dl_frequency_(\d+)")),
-        #     (COL_DL_ARFCN, re.compile(r"nr_dl_arfcn_(\d+)")),
-        #     (COL_SCS, re.compile(r"nr_numerology_scs_(\d+)")),
-        # ]
+    ]
+    dcell_df = params_disp_df.get(dbcon, dparameter_to_columns_list, time_before, default_table="nr_cell_meas", not_null_first_col=True, custom_lookback_dur_millis=gc.DEFAULT_LOOKBACK_DUR_MILLIS)
+    #print("0dcell_df.head():\n%s" % dcell_df.head())
+    dcell_df.columns = ["CellGroup"]+dcell_col_renamed
+    #print("dcell_df.head():\n%s" % dcell_df.head())
+    df_list.append(dcell_df)
 
         # DET_PARAMS = [
         #     (COL_PCI, re.compile(r"nr_detectedbeam(\d+)_pci(?:_1)")),
