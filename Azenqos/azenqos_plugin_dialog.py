@@ -615,6 +615,7 @@ class AzenqosDialog(QMainWindow):
         AzenqosDialog.resize(640, 480)
         # self.setupTreeWidget(AzenqosDialog)
         self.mdi = GroupArea()
+        gc.mdi = self.mdi
         self.setCentralWidget(self.mdi)
         toolbar = self.addToolBar("Azenqos Toolbar")
         self.toolbar = toolbar
@@ -1292,9 +1293,7 @@ class AzenqosDialog(QMainWindow):
             if child == "Radio Parameters":
                 if hasattr(self, "gsm_rdp_window") is True:
                     tableWindow = self.gsm_rdp_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gsm_rdp_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gsm_rdp_window, windowName)
 
                     if self.gsm_rdp_window not in subwindowList:
                         self.gsm_rdp_window = SubWindowArea(self.mdi)
@@ -1302,6 +1301,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gsm_rdp_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gsm_rdp_window.show()
                 else:
                     # create new subwindow
@@ -1315,9 +1315,7 @@ class AzenqosDialog(QMainWindow):
             elif child == "Serving + Neighbors":
                 if hasattr(self, "gsm_sn_window") is True:
                     tableWindow = self.gsm_sn_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gsm_sn_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gsm_sn_window, windowName)
 
                     if self.gsm_sn_window not in subwindowList:
                         self.gsm_sn_window = SubWindowArea(self.mdi)
@@ -1325,6 +1323,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gsm_sn_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gsm_sn_window.show()
                 else:
                     # create new subwindow
@@ -1338,9 +1337,7 @@ class AzenqosDialog(QMainWindow):
             elif child == "Current Channel":
                 if hasattr(self, "gsm_cc_window") is True:
                     tableWindow = self.gsm_cc_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gsm_cc_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gsm_cc_window, windowName)
 
                     if self.gsm_cc_window not in subwindowList:
                         self.gsm_cc_window = SubWindowArea(self.mdi)
@@ -1348,6 +1345,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gsm_cc_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gsm_cc_window.show()
                 else:
                     # create new subwindow
@@ -1361,9 +1359,7 @@ class AzenqosDialog(QMainWindow):
             elif child == "C/I":
                 if hasattr(self, "gsm_ci_window") is True:
                     tableWindow = self.gsm_ci_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gsm_ci_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gsm_ci_window, windowName)
 
                     if self.gsm_ci_window not in subwindowList:
                         self.gsm_ci_window = SubWindowArea(self.mdi)
@@ -1371,6 +1367,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gsm_ci_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gsm_ci_window.show()
                 else:
                     # create new subwindow
@@ -1399,6 +1396,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.gsm_lc_window.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.gsm_lc_window.show()
                 else:
                     # create new subwindow
@@ -1414,9 +1412,7 @@ class AzenqosDialog(QMainWindow):
             elif child == "Events Counter":
                 if hasattr(self, "gsm_ec_window") is True:
                     tableWindow = self.gsm_ec_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gsm_ec_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gsm_ec_window, windowName)
 
                     if self.gsm_ec_window not in subwindowList:
                         self.gsm_ec_window = SubWindowArea(self.mdi)
@@ -1424,6 +1420,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gsm_ec_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gsm_ec_window.show()
                 else:
                     # create new subwindow
@@ -1439,9 +1436,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_ams_window") is True:
                     tableWindow = self.wcdma_ams_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_ams_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_ams_window, windowName)
 
                     if self.wcdma_ams_window not in subwindowList:
                         self.wcdma_ams_window = SubWindowArea(self.mdi)
@@ -1449,6 +1444,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_ams_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_ams_window.show()
                 else:
                     # create new subwindow
@@ -1463,9 +1459,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_rp_window") is True:
                     tableWindow = self.wcdma_rp_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_rp_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_rp_window, windowName)
 
                     if self.wcdma_rp_window not in subwindowList:
                         self.wcdma_rp_window = SubWindowArea(self.mdi)
@@ -1473,6 +1467,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_rp_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_rp_window.show()
                 else:
                     # create new subwindow
@@ -1487,9 +1482,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_asl_window") is True:
                     tableWindow = self.wcdma_asl_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_asl_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_asl_window, windowName)
 
                     if self.wcdma_asl_window not in subwindowList:
                         self.wcdma_asl_window = SubWindowArea(self.mdi)
@@ -1497,6 +1490,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_asl_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_asl_window.show()
                 else:
                     # create new subwindow
@@ -1511,9 +1505,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_msl_window") is True:
                     tableWindow = self.wcdma_msl_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_msl_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_msl_window, windowName)
 
                     if self.wcdma_msl_window not in subwindowList:
                         self.wcdma_msl_window = SubWindowArea(self.mdi)
@@ -1521,6 +1513,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_msl_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_msl_window.show()
                 else:
                     # create new subwindow
@@ -1535,9 +1528,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_bler_window") is True:
                     tableWindow = self.wcdma_msl_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_bler_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_bler_window, windowName)
 
                     if self.wcdma_bler_window not in subwindowList:
                         self.wcdma_bler_window = SubWindowArea(self.mdi)
@@ -1545,6 +1536,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_bler_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_bler_window.show()
                 else:
                     # create new subwindow
@@ -1559,9 +1551,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_blertc_window") is True:
                     tableWindow = self.wcdma_blertc_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_blertc_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_blertc_window, windowName)
 
                     if self.wcdma_blertc_window not in subwindowList:
                         self.wcdma_blertc_window = SubWindowArea(self.mdi)
@@ -1569,6 +1559,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_blertc_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_blertc_window.show()
                 else:
                     # create new subwindow
@@ -1597,6 +1588,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.wcdma_lc_window.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.wcdma_lc_window.show()
                 else:
                     # create new subwindow
@@ -1613,9 +1605,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_bearer_window") is True:
                     tableWindow = self.wcdma_bearer_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_bearer_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_bearer_window, windowName)
 
                     if self.wcdma_bearer_window not in subwindowList:
                         self.wcdma_bearer_window = SubWindowArea(self.mdi)
@@ -1623,6 +1613,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_bearer_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_bearer_window.show()
                 else:
                     # create new subwindow
@@ -1637,9 +1628,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_ppc_window") is True:
                     tableWindow = self.wcdma_ppc_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_ppc_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_ppc_window, windowName)
 
                     if self.wcdma_ppc_window not in subwindowList:
                         self.wcdma_ppc_window = SubWindowArea(self.mdi)
@@ -1647,6 +1636,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_ppc_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_ppc_window.show()
                 else:
                     # create new subwindow
@@ -1661,9 +1651,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_amb_window") is True:
                     tableWindow = self.wcdma_amb_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_amb_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_amb_window, windowName)
 
                     if self.wcdma_amb_window not in subwindowList:
                         self.wcdma_amb_window = SubWindowArea(self.mdi)
@@ -1671,6 +1659,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_amb_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_amb_window.show()
                 else:
                     # create new subwindow
@@ -1685,9 +1674,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_report_window") is True:
                     tableWindow = self.wcdma_report_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_report_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_report_window, windowName)
 
                     if self.wcdma_report_window not in subwindowList:
                         self.wcdma_report_window = SubWindowArea(self.mdi)
@@ -1695,6 +1682,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_report_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_report_window.show()
                 else:
                     # create new subwindow
@@ -1709,9 +1697,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_cells_window") is True:
                     tableWindow = self.wcdma_cells_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_cells_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wcdma_cells_window, windowName)
 
                     if self.wcdma_cells_window not in subwindowList:
                         self.wcdma_cells_window = SubWindowArea(self.mdi)
@@ -1719,6 +1705,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_cells_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_cells_window.show()
                 else:
                     # create new subwindow
@@ -1733,11 +1720,9 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wcdma_analyzer_window") is True:
                     tableWindow = self.wcdma_analyzer_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(
-                            self.wcdma_analyzer_window, windowName
-                        )
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(
+                        self.wcdma_analyzer_window, windowName
+                    )
 
                     if self.wcdma_analyzer_window not in subwindowList:
                         self.wcdma_analyzer_window = SubWindowArea(self.mdi)
@@ -1745,6 +1730,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wcdma_analyzer_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wcdma_analyzer_window.show()
                 else:
                     # create new subwindow
@@ -1760,9 +1746,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "lte_param_window") is True:
                     tableWindow = self.lte_param_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.lte_param_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.lte_param_window, windowName)
 
                     if self.lte_param_window not in subwindowList:
                         self.lte_param_window = SubWindowArea(self.mdi)
@@ -1770,6 +1754,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.lte_param_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.lte_param_window.show()
                 else:
                     # create new subwindow
@@ -1784,9 +1769,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "lte_sn_window") is True:
                     tableWindow = self.lte_sn_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.lte_sn_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.lte_sn_window, windowName)
 
                     if self.lte_sn_window not in subwindowList:
                         self.lte_sn_window = SubWindowArea(self.mdi)
@@ -1794,6 +1777,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.lte_sn_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.lte_sn_window.show()
                 else:
                     # create new subwindow
@@ -1808,9 +1792,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "lte_ppparam_window") is True:
                     tableWindow = self.lte_ppparam_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.lte_ppparam_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.lte_ppparam_window, windowName)
 
                     if self.lte_ppparam_window not in subwindowList:
                         self.lte_ppparam_window = SubWindowArea(self.mdi)
@@ -1818,6 +1800,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.lte_ppparam_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.lte_ppparam_window.show()
                 else:
                     # create new subwindow
@@ -1834,14 +1817,9 @@ class AzenqosDialog(QMainWindow):
                     linechartWindow = self.lte_lc_window.widget()
                     del linechartWindow
                     linechartWindow = None
-                    if not linechartWindow:
-                        widget = Ui_LTE_LCwidget(
-                            self.lte_lc_window, windowName, gc.azenqosDatabase
-                        )
-                        gc.openedWindows.append(widget)
-                    else:
-                        widget = linechartWindow
-                        widget.show()
+                    widget = Ui_LTE_LCwidget(
+                        self.lte_lc_window, windowName, gc.azenqosDatabase
+                    )
 
                     if self.lte_lc_window not in subwindowList:
                         self.lte_lc_window = SubWindowArea(self.mdi)
@@ -1849,6 +1827,7 @@ class AzenqosDialog(QMainWindow):
 
                     if widget:
                         self.lte_lc_window.setWidget(widget)
+                        gc.openedWindows.append(widget)
                     self.lte_lc_window.show()
                 else:
                     # create new subwindow
@@ -1865,9 +1844,7 @@ class AzenqosDialog(QMainWindow):
                 widget = None
                 if hasattr(self, "lte_rlc_window") is True:
                     tableWindow = self.lte_rlc_window.widget()
-                    if not tableWindow:
-                        widget = TableWindow(self.lte_rlc_window, windowName)
-                        gc.openedWindows.append(widget)
+                    widget = TableWindow(self.lte_rlc_window, windowName)
 
                     if self.lte_rlc_window not in subwindowList:
                         self.lte_rlc_window = SubWindowArea(self.mdi)
@@ -1875,6 +1852,7 @@ class AzenqosDialog(QMainWindow):
 
                     if widget:
                         self.lte_rlc_window.setWidget(widget)
+                        gc.openedWindows.append(widget)
                     self.lte_rlc_window.show()
                 else:
                     # create new subwindow
@@ -1914,9 +1892,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "nr_param_window") is True:
                     tableWindow = self.nr_param_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.nr_param_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.nr_param_window, windowName)
 
                     if self.nr_param_window not in subwindowList:
                         self.nr_param_window = SubWindowArea(self.mdi)
@@ -1924,6 +1900,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.nr_param_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.nr_param_window.show()
                 else:
                     # create new subwindow
@@ -1938,9 +1915,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "nr_sn_window") is True:
                     tableWindow = self.nr_sn_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.nr_sn_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.nr_sn_window, windowName)
 
                     if self.nr_sn_window not in subwindowList:
                         self.nr_sn_window = SubWindowArea(self.mdi)
@@ -1948,6 +1923,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.nr_sn_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.nr_sn_window.show()
                 else:
                     # create new subwindow
@@ -1963,9 +1939,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "cdma_rp_window") is True:
                     tableWindow = self.cdma_rp_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.cdma_rp_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.cdma_rp_window, windowName)
 
                     if self.cdma_rp_window not in subwindowList:
                         self.cdma_rp_window = SubWindowArea(self.mdi)
@@ -1973,6 +1947,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.cdma_rp_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.cdma_rp_window.show()
                 else:
                     # create new subwindow
@@ -1987,9 +1962,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "cdma_sn_window") is True:
                     tableWindow = self.cdma_sn_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.cdma_sn_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.cdma_sn_window, windowName)
 
                     if self.cdma_sn_window not in subwindowList:
                         self.cdma_sn_window = SubWindowArea(self.mdi)
@@ -1997,6 +1970,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.cdma_sn_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.cdma_sn_window.show()
                 else:
                     # create new subwindow
@@ -2011,9 +1985,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "cdma_evdo_window") is True:
                     tableWindow = self.cdma_evdo_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.cdma_evdo_window, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.cdma_evdo_window, windowName)
 
                     if self.cdma_evdo_window not in subwindowList:
                         self.cdma_evdo_window = SubWindowArea(self.mdi)
@@ -2021,6 +1993,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.cdma_evdo_window.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.cdma_evdo_window.show()
                 else:
                     # create new subwindow
@@ -2038,11 +2011,9 @@ class AzenqosDialog(QMainWindow):
                     linechartWindow = self.gsm_data_lc.widget()
                     del linechartWindow
                     linechartWindow = None
-                    if not linechartWindow:
-                        linechartWidget = Ui_GSM_Data_LCwidget(
-                            self, windowName, gc.azenqosDatabase
-                        )
-                        gc.openedWindows.append(linechartWidget)
+                    linechartWidget = Ui_GSM_Data_LCwidget(
+                        self, windowName, gc.azenqosDatabase
+                    )
 
                     if self.gsm_data_lc not in subwindowList:
                         self.gsm_data_lc = SubWindowArea(self.mdi)
@@ -2050,6 +2021,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.gsm_data_lc.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.gsm_data_lc.show()
                 else:
                     # create new subwindow
@@ -2068,11 +2040,9 @@ class AzenqosDialog(QMainWindow):
                     linechartWindow = self.wcdma_data_lc.widget()
                     del linechartWindow
                     linechartWindow = None
-                    if not linechartWindow:
-                        linechartWidget = Ui_WCDMA_Data_LCwidget(
-                            self, windowName, gc.azenqosDatabase
-                        )
-                        gc.openedWindows.append(linechartWidget)
+                    linechartWidget = Ui_WCDMA_Data_LCwidget(
+                        self, windowName, gc.azenqosDatabase
+                    )
 
                     if self.wcdma_data_lc not in subwindowList:
                         self.wcdma_data_lc = SubWindowArea(self.mdi)
@@ -2080,6 +2050,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.wcdma_data_lc.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.wcdma_data_lc.show()
                 else:
                     # create new subwindow
@@ -2096,9 +2067,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "gprs_info") is True:
                     tableWindow = self.gprs_info.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.gprs_info, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.gprs_info, windowName)
 
                     if self.gprs_info not in subwindowList:
                         self.gprs_info = SubWindowArea(self.mdi)
@@ -2106,6 +2075,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.gprs_info.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.gprs_info.show()
                 else:
                     # create new subwindow
@@ -2120,9 +2090,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "web_browser") is True:
                     tableWindow = self.web_browser.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.web_browser, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.web_browser, windowName)
 
                     if self.web_browser not in subwindowList:
                         self.web_browser = SubWindowArea(self.mdi)
@@ -2130,6 +2098,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.web_browser.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.web_browser.show()
                 else:
                     # create new subwindow
@@ -2144,9 +2113,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "hsdpa_stat") is True:
                     tableWindow = self.hsdpa_stat.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.hsdpa_stat, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.hsdpa_stat, windowName)
 
                     if self.hsdpa_stat not in subwindowList:
                         self.hsdpa_stat = SubWindowArea(self.mdi)
@@ -2154,6 +2121,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.hsdpa_stat.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.hsdpa_stat.show()
                 else:
                     # create new subwindow
@@ -2168,9 +2136,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "hsupa_stat") is True:
                     tableWindow = self.hsupa_stat.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.hsupa_stat, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.hsupa_stat, windowName)
 
                     if self.hsupa_stat not in subwindowList:
                         self.hsupa_stat = SubWindowArea(self.mdi)
@@ -2178,6 +2144,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.hsupa_stat.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.hsupa_stat.show()
                 else:
                     # create new subwindow
@@ -2192,9 +2159,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "lte_data_stat") is True:
                     tableWindow = self.lte_data_stat.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.lte_data_stat, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.lte_data_stat, windowName)
 
                     if self.lte_data_stat not in subwindowList:
                         self.lte_data_stat = SubWindowArea(self.mdi)
@@ -2202,6 +2167,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.lte_data_stat.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.lte_data_stat.show()
                 else:
                     # create new subwindow
@@ -2218,11 +2184,9 @@ class AzenqosDialog(QMainWindow):
                     linechartWindow = self.lte_data_lc.widget()
                     del linechartWindow
                     linechartWindow = None
-                    if not linechartWindow:
-                        linechartWidget = Ui_LTE_Data_LCwidget(
-                            self, windowName, gc.azenqosDatabase
-                        )
-                        gc.openedWindows.append(linechartWidget)
+                    linechartWidget = Ui_LTE_Data_LCwidget(
+                        self, windowName, gc.azenqosDatabase
+                    )
 
                     if self.lte_data_lc not in subwindowList:
                         self.lte_data_lc = SubWindowArea(self.mdi)
@@ -2230,6 +2194,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.lte_data_lc.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.lte_data_lc.show()
                 else:
                     # create new subwindow
@@ -2246,9 +2211,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wifi_connected_ap") is True:
                     tableWindow = self.wifi_connected_ap.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wifi_connected_ap, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wifi_connected_ap, windowName)
 
                     if self.wifi_connected_ap not in subwindowList:
                         self.wifi_connected_ap = SubWindowArea(self.mdi)
@@ -2256,6 +2219,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wifi_connected_ap.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wifi_connected_ap.show()
                 else:
                     # create new subwindow
@@ -2270,9 +2234,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wifi_scanned_ap") is True:
                     tableWindow = self.wifi_scanned_ap.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wifi_scanned_ap, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wifi_scanned_ap, windowName)
 
                     if self.wifi_scanned_ap not in subwindowList:
                         self.wifi_scanned_ap = SubWindowArea(self.mdi)
@@ -2280,6 +2242,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wifi_scanned_ap.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wifi_scanned_ap.show()
                 else:
                     # create new subwindow
@@ -2294,9 +2257,7 @@ class AzenqosDialog(QMainWindow):
                 tableWidget = None
                 if hasattr(self, "wifi_graph") is True:
                     tableWindow = self.wifi_graph.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wifi_graph, windowName)
-                        gc.openedWindows.append(tableWidget)
+                    tableWidget = TableWindow(self.wifi_graph, windowName)
 
                     if self.wifi_graph not in subwindowList:
                         self.wifi_graph = SubWindowArea(self.mdi)
@@ -2304,6 +2265,7 @@ class AzenqosDialog(QMainWindow):
 
                     if tableWidget:
                         self.wifi_graph.setWidget(tableWidget)
+                        gc.openedWindows.append(tableWidget)
                     self.wifi_graph.show()
                 else:
                     # create new subwindow
@@ -2320,11 +2282,9 @@ class AzenqosDialog(QMainWindow):
                     linechartWindow = self.nr_data_lc.widget()
                     del linechartWindow
                     linechartWindow = None
-                    if not linechartWindow:
-                        linechartWidget = Ui_NR_Data_LCwidget(
-                            self, windowName, gc.azenqosDatabase
-                        )
-                        gc.openedWindows.append(linechartWidget)
+                    linechartWidget = Ui_NR_Data_LCwidget(
+                        self, windowName, gc.azenqosDatabase
+                    )
 
                     if self.nr_data_lc not in subwindowList:
                         self.nr_data_lc = SubWindowArea(self.mdi)
@@ -2332,6 +2292,7 @@ class AzenqosDialog(QMainWindow):
 
                     if linechartWidget:
                         self.nr_data_lc.setWidget(linechartWidget)
+                        gc.openedWindows.append(linechartWidget)
                     self.nr_data_lc.show()
                 else:
                     # create new subwindow
@@ -2349,9 +2310,7 @@ class AzenqosDialog(QMainWindow):
                 events_widget = None
                 if hasattr(self, "events_window") is True:
                     tableWindow = self.events_window.widget()
-                    if not tableWindow:
-                        events_widget = TableWindow(self.events_window, windowName)
-                        gc.openedWindows.append(events_widget)
+                    events_widget = TableWindow(self.events_window, windowName)
 
                     if self.events_window not in subwindowList:
                         self.events_window = SubWindowArea(self.mdi)
@@ -2359,6 +2318,7 @@ class AzenqosDialog(QMainWindow):
 
                     if events_widget:
                         self.events_window.setWidget(events_widget)
+                        gc.openedWindows.append(events_widget)
                     self.events_window.show()
 
                 else:
@@ -2374,11 +2334,9 @@ class AzenqosDialog(QMainWindow):
                 layer_one_widget = None
                 if hasattr(self, "layer_one_messages") is True:
                     tableWindow = self.layer_one_messages.widget()
-                    if not tableWindow:
-                        layer_one_widget = TableWindow(
-                            self.layer_one_messages, windowName
-                        )
-                        gc.openedWindows.append(layer_one_widget)
+                    layer_one_widget = TableWindow(
+                        self.layer_one_messages, windowName
+                    )
 
                     if self.layer_one_messages not in subwindowList:
                         self.layer_one_messages = SubWindowArea(self.mdi)
@@ -2386,6 +2344,7 @@ class AzenqosDialog(QMainWindow):
 
                     if layer_one_widget:
                         self.layer_one_messages.setWidget(layer_one_widget)
+                        gc.openedWindows.append(layer_one_widget)
                     self.layer_one_messages.show()
 
                 else:
@@ -2408,11 +2367,9 @@ class AzenqosDialog(QMainWindow):
                 layer_three_widget = None
                 if hasattr(self, "layer_three_messages") is True:
                     tableWindow = self.layer_three_messages.widget()
-                    if not tableWindow:
-                        layer_three_widget = TableWindow(
-                            self.layer_three_messages, windowName
-                        )
-                        gc.openedWindows.append(layer_three_widget)
+                    layer_three_widget = TableWindow(
+                        self.layer_three_messages, windowName
+                    )
 
                     if self.layer_three_messages not in subwindowList:
                         self.layer_three_messages = SubWindowArea(self.mdi)
@@ -2420,6 +2377,7 @@ class AzenqosDialog(QMainWindow):
 
                     if layer_three_widget:
                         self.layer_three_messages.setWidget(layer_three_widget)
+                        gc.openedWindows.append(layer_three_widget)
                     self.layer_three_messages.show()
 
                 else:
@@ -2444,9 +2402,7 @@ class AzenqosDialog(QMainWindow):
                 benchmark_widget = None
                 if hasattr(self, "benchmark") is True:
                     tableWindow = self.benchmark.widget()
-                    if not tableWindow:
-                        benchmark_widget = TableWindow(self.benchmark, windowName)
-                        gc.openedWindows.append(benchmark_widget)
+                    benchmark_widget = TableWindow(self.benchmark, windowName)
 
                     if self.benchmark not in subwindowList:
                         self.benchmark = SubWindowArea(self.mdi)
@@ -2454,7 +2410,7 @@ class AzenqosDialog(QMainWindow):
 
                     if benchmark_widget:
                         self.benchmark.setWidget(benchmark_widget)
-
+                        gc.openedWindows.append(benchmark_widget)
                     self.benchmark.show()
 
                 else:
@@ -2477,9 +2433,7 @@ class AzenqosDialog(QMainWindow):
                 mm_widget = None
                 if hasattr(self, "mm_reg_states") is True:
                     tableWindow = self.mm_reg_states.widget()
-                    if not tableWindow:
-                        mm_widget = TableWindow(self.mm_reg_states, windowName)
-                        gc.openedWindows.append(mm_widget)
+                    mm_widget = TableWindow(self.mm_reg_states, windowName)
 
                     if self.mm_reg_states not in subwindowList:
                         self.mm_reg_states = SubWindowArea(self.mdi)
@@ -2487,7 +2441,7 @@ class AzenqosDialog(QMainWindow):
 
                     if mm_widget:
                         self.mm_reg_states.setWidget(mm_widget)
-
+                        gc.openedWindows.append(mm_widget)
                     self.mm_reg_states.show()
 
                 else:
@@ -2510,11 +2464,9 @@ class AzenqosDialog(QMainWindow):
                 serving_system_widget = None
                 if hasattr(self, "serving_system_info") is True:
                     tableWindow = self.serving_system_info.widget()
-                    if not tableWindow:
-                        serving_system_widget = TableWindow(
-                            self.serving_system_info, windowName
-                        )
-                        gc.openedWindows.append(serving_system_widget)
+                    serving_system_widget = TableWindow(
+                        self.serving_system_info, windowName
+                    )
 
                     if self.serving_system_info not in subwindowList:
                         self.serving_system_info = SubWindowArea(self.mdi)
@@ -2522,7 +2474,7 @@ class AzenqosDialog(QMainWindow):
 
                     if serving_system_widget:
                         self.serving_system_info.setWidget(serving_system_widget)
-
+                        gc.openedWindows.append(serving_system_widget)
                     self.serving_system_info.show()
 
                 else:
@@ -2547,16 +2499,14 @@ class AzenqosDialog(QMainWindow):
                 debug_event_widget = None
                 if hasattr(self, "debug_event") is True:
                     tableWindow = self.debug_event.widget()
-                    if not tableWindow:
-                        debug_event_widget = TableWindow(self.debug_event, windowName)
-                        gc.openedWindows.append(debug_event_widget)
+                    debug_event_widget = TableWindow(self.debug_event, windowName)
 
                     if self.debug_event not in subwindowList:
                         self.debug_event = SubWindowArea(self.mdi)
                         self.mdi.addSubWindow(self.debug_event)
                     if debug_event_widget:
                         self.debug_event.setWidget(debug_event_widget)
-
+                        gc.openedWindows.append(debug_event_widget)
                     self.debug_event.show()
 
                 else:
@@ -2654,6 +2604,8 @@ class AzenqosDialog(QMainWindow):
             )
 
         if reply == QMessageBox.Yes or self.newImport is True:
+            if not self.newImport:
+                del self.databaseUi.azenqosMainMenu
             saving = Utils().saveState(gc.CURRENT_PATH)
             iface.actionPan().trigger()
             self.pauseTime()
@@ -2705,5 +2657,9 @@ class GroupArea(QMdiArea):
 class SubWindowArea(QMdiSubWindow):
     def __init__(self, item):
         super().__init__(item)
+        super().setGeometry(0,0,300,400)
         dirname = os.path.dirname(__file__)
         self.setWindowIcon(QIcon(QPixmap(os.path.join(dirname, "icon.png"))))
+
+    def closeEvent(self, QCloseEvent):
+        gc.mdi.removeSubWindow(self)

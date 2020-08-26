@@ -744,7 +744,7 @@ class TableWindow(QWidget):
         self.currentRow = currentTimeindex
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:

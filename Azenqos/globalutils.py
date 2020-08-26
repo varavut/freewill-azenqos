@@ -221,13 +221,19 @@ class Utils:
         with open(file_path, "w") as f:
             saveEntities = {}
             winList = []
-            for window in gc.openedWindows:
+            subwindowList = gc.mdi.subWindowList()
+            for index,window in enumerate(gc.openedWindows):
+                subWindow = subwindowList[index]
+                size = subWindow.size()
+                pos = subWindow.pos()
                 windowProperties = {
                     "windowTitle": str(window.title),
                     "displayTitle": window.windowTitle(),
                     "customData": hasattr(window, 'customData') and window.customData or None,
                     "customHeader": hasattr(window, 'customHeader') and window.customHeader or None,
                     "appliedSchema": hasattr(window, 'appliedSchema') and window.appliedSchema or None,
+                    "size": {"width":size.width(),"height":size.height()},
+                    "position": {"x":pos.x(),"y":pos.y()},
                 }
                 winList.append(windowProperties)
 
@@ -243,13 +249,19 @@ class Utils:
         with open(file_path, "w") as f:
             saveEntities = {}
             winList = []
-            for window in gc.openedWindows:
+            subwindowList = gc.mdi.subWindowList()
+            for index,window in enumerate(gc.openedWindows):
+                subWindow = subwindowList[index]
+                size = subWindow.size()
+                pos = subWindow.pos()
                 windowProperties = {
                     "windowTitle": str(window.title),
                     "displayTitle": window.windowTitle(),
                     "customData": hasattr(window, 'customData') and window.customData or None,
                     "customHeader": hasattr(window, 'customHeader') and window.customHeader or None,
                     "appliedSchema": hasattr(window, 'appliedSchema') and window.appliedSchema or None,
+                    "size": {"width":size.width(),"height":size.height()},
+                    "position": {"x":pos.x(),"y":pos.y()},
                 }
                 winList.append(windowProperties)
 
@@ -284,14 +296,18 @@ class Utils:
             for window in loadedEntities["windows"]:
                 name = window["windowTitle"].split("_")
                 dialog.classifySelectedItems(name[0], name[1])
+                subwindowList = gc.mdi.subWindowList()
                 try:
                     newWindow = gc.openedWindows[len(gc.openedWindows) - 1]
+                    subWindow = subwindowList[len(subwindowList) - 1]
+                    subWindow.resize(int(window["size"]["width"]),int(window["size"]["height"]))
+                    subWindow.move(int(window["position"]["x"]),int(window["position"]["y"]))
                     newWindow.customData = window["customData"]
                     newWindow.customHeader = window["customHeader"]
                     newWindow.appliedSchema = window["appliedSchema"]
                     newWindow.setWindowTitle(window["displayTitle"])
                     newWindow.queryFromSchema()
-                except:
+                except Exception as ex:
                     continue
 
             try:
@@ -333,14 +349,18 @@ class Utils:
             for window in loadedEntities["windows"]:
                 name = window["windowTitle"].split("_")
                 dialog.classifySelectedItems(name[0], name[1])
+                subwindowList = gc.mdi.subWindowList()
                 try:
                     newWindow = gc.openedWindows[len(gc.openedWindows) - 1]
+                    subWindow = subwindowList[len(subwindowList) - 1]
+                    subWindow.resize(int(window["size"]["width"]),int(window["size"]["height"]))
+                    subWindow.move(int(window["position"]["x"]),int(window["position"]["y"]))
                     newWindow.customData = window["customData"]
                     newWindow.customHeader = window["customHeader"]
                     newWindow.appliedSchema = window["appliedSchema"]
                     newWindow.setWindowTitle(window["displayTitle"])
                     newWindow.queryFromSchema()
-                except:
+                except Exception as ex:
                     continue
 
             try:

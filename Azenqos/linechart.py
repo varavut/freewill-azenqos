@@ -253,7 +253,7 @@ class Ui_LTE_LCwidget(QWidget):
         self.lte_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -485,7 +485,7 @@ class Ui_WCDMA_LCwidget(QWidget):
         self.wcdma_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -714,7 +714,7 @@ class Ui_LTE_Data_LCwidget(QWidget):
         self.lte_data_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -879,7 +879,7 @@ class Ui_NR_Data_LCwidget(QWidget):
         self.nr_data_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -1114,7 +1114,7 @@ class Ui_WCDMA_Data_LCwidget(QWidget):
         self.wcdma_data_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -1316,7 +1316,7 @@ class Ui_WCDMA_PA_LCwidget(QWidget):
         self.pa_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -1489,7 +1489,7 @@ class Ui_GSM_LCwidget(QWidget):
         self.gsm_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -1699,7 +1699,7 @@ class Ui_GSM_Data_LCwidget(QWidget):
         self.gsm_widget.moveLineChart(sampledate)
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
@@ -2360,7 +2360,7 @@ class LineChart(QWidget):
         # self.datelabel.move(QPoint(datalabelX, datalabelY))
 
     def closeEvent(self, QCloseEvent):
-        indices = [i for i, x in enumerate(gc.openedWindows) if x == self]
+        indices = [i for i, x in enumerate(gc.openedWindows) if x.title == self.title]
         for index in indices:
             gc.openedWindows.pop(index)
         # if self.tablename and self.tablename in gc.tableList:
