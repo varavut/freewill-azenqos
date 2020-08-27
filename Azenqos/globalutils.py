@@ -237,6 +237,8 @@ class Utils:
                 }
                 winList.append(windowProperties)
 
+            mainWindowSize = gc.mdi.size()
+            saveEntities["winSize"] = {"width":mainWindowSize.width(),"height":mainWindowSize.height()}
             saveEntities["windows"] = winList
             saveEntities["timestamp"] = gc.currentTimestamp
             jsonString = json.dumps(saveEntities)
@@ -265,6 +267,8 @@ class Utils:
                 }
                 winList.append(windowProperties)
 
+            mainWindowSize = gc.mdi.size()
+            saveEntities["winSize"] = {"width":mainWindowSize.width(),"height":mainWindowSize.height()}
             saveEntities["windows"] = winList
             saveEntities["timestamp"] = gc.currentTimestamp
             jsonString = json.dumps(saveEntities)
@@ -312,6 +316,8 @@ class Utils:
 
             try:
                 loadedTimestamp = float(loadedEntities["timestamp"])
+                dialog.resize(int(loadedEntities["winSize"]["width"]),int(loadedEntities["winSize"]["height"]))
+
             except:
                 pass
 
@@ -365,6 +371,7 @@ class Utils:
 
             try:
                 loadedTimestamp = float(loadedEntities["timestamp"])
+                dialog.resize(int(loadedEntities["winSize"]["width"]),int(loadedEntities["winSize"]["height"]))
             except:
                 pass
 
