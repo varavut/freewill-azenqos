@@ -65,13 +65,13 @@ class CellSetting(QWidget):
         self.cbSystem.setGeometry(QRect(10, 60, 141, 32))
         self.cbSystem.setObjectName("cbSystem")
 
-        self.lblMobile = QLabel(self.CellContent)
-        self.lblMobile.setGeometry(QRect(180, 40, 59, 16))
-        self.lblMobile.setObjectName("lblMobile")
+        # self.lblMobile = QLabel(self.CellContent)
+        # self.lblMobile.setGeometry(QRect(180, 40, 59, 16))
+        # self.lblMobile.setObjectName("lblMobile")
 
-        self.cbMobile = QComboBox(self.CellContent)
-        self.cbMobile.setGeometry(QRect(170, 60, 111, 32))
-        self.cbMobile.setObjectName("cbMobile")
+        # self.cbMobile = QComboBox(self.CellContent)
+        # self.cbMobile.setGeometry(QRect(170, 60, 111, 32))
+        # self.cbMobile.setObjectName("cbMobile")
 
         self.lblElement = QLabel(self.CellContent)
         self.lblElement.setGeometry(QRect(20, 100, 59, 16))
@@ -82,13 +82,13 @@ class CellSetting(QWidget):
         self.fcbElement.setCurrentText("")
         self.fcbElement.setObjectName("fcbElement")
 
-        self.lblArgument = QLabel(self.CellContent)
-        self.lblArgument.setGeometry(QRect(250, 100, 61, 16))
-        self.lblArgument.setObjectName("lblArgument")
+        # self.lblArgument = QLabel(self.CellContent)
+        # self.lblArgument.setGeometry(QRect(250, 100, 61, 16))
+        # self.lblArgument.setObjectName("lblArgument")
 
-        self.cbArgument = QComboBox(self.CellContent)
-        self.cbArgument.setGeometry(QRect(240, 120, 111, 32))
-        self.cbArgument.setObjectName("cbArgument")
+        # self.cbArgument = QComboBox(self.CellContent)
+        # self.cbArgument.setGeometry(QRect(240, 120, 111, 32))
+        # self.cbArgument.setObjectName("cbArgument")
 
         self.lblValue = QLabel(self.CellContent)
         self.lblValue.setGeometry(QRect(20, 160, 59, 16))
@@ -102,21 +102,21 @@ class CellSetting(QWidget):
         self.fcbValue.setCurrentText("")
         self.fcbValue.setObjectName("fcbValue")
 
-        self.rbEventCounter = QRadioButton(self.CellContent)
-        self.rbEventCounter.setGeometry(QRect(10, 230, 151, 20))
-        self.rbEventCounter.setObjectName("rbEventCounter")
+        # self.rbEventCounter = QRadioButton(self.CellContent)
+        # self.rbEventCounter.setGeometry(QRect(10, 230, 151, 20))
+        # self.rbEventCounter.setObjectName("rbEventCounter")
 
-        self.fcbEventCounter = QFontComboBox(self.CellContent)
-        self.fcbEventCounter.setGeometry(QRect(10, 260, 211, 32))
-        self.fcbEventCounter.setCurrentText("")
-        self.fcbEventCounter.setObjectName("fcbEventCounter")
+        # self.fcbEventCounter = QFontComboBox(self.CellContent)
+        # self.fcbEventCounter.setGeometry(QRect(10, 260, 211, 32))
+        # self.fcbEventCounter.setCurrentText("")
+        # self.fcbEventCounter.setObjectName("fcbEventCounter")
 
         self.rbText = QRadioButton(self.CellContent)
-        self.rbText.setGeometry(QRect(10, 310, 151, 20))
+        self.rbText.setGeometry(QRect(10, 230, 151, 20))
         self.rbText.setObjectName("rbText")
 
         self.leText = QLineEdit(self.CellContent)
-        self.leText.setGeometry(QRect(10, 340, 211, 32))
+        self.leText.setGeometry(QRect(10, 260, 211, 32))
         self.leText.setObjectName("leText")
         # self.leText.setText(self.selected_item.text(0))
 
@@ -138,7 +138,7 @@ class CellSetting(QWidget):
 
         # Set signal events
         self.rbInformationElement.toggled.connect(self.rbInformationElementSelected)
-        self.rbEventCounter.toggled.connect(self.rbEventCounterSelected)
+        # self.rbEventCounter.toggled.connect(self.rbEventCounterSelected)
         self.rbText.toggled.connect(self.rbTextSelected)
         self.rbText.setChecked(True)
         self.cbSystem.currentTextChanged.connect(self.cbSystemOnChanged)
@@ -155,10 +155,10 @@ class CellSetting(QWidget):
             _translate("cellSetting", "Information Element")
         )
         self.lblSystem.setText(_translate("cellSetting", "System"))
-        self.lblMobile.setText(_translate("cellSetting", "Mobile"))
-        self.lblElement.setText(_translate("cellSetting", "Element"))
-        self.lblArgument.setText(_translate("cellSetting", "Argument"))
-        self.rbEventCounter.setText(_translate("cellSetting", "Event counter"))
+        # self.lblMobile.setText(_translate("cellSetting", "Mobile"))
+        self.lblElement.setText(_translate("cellSetting", "Table"))
+        # self.lblArgument.setText(_translate("cellSetting", "Argument"))
+        # self.rbEventCounter.setText(_translate("cellSetting", "Event counter"))
         self.rbText.setText(_translate("cellSetting", "Text"))
         self.lblValue.setText(_translate("cellSetting", "Value"))
         self.tabWidget.setTabText(
@@ -173,28 +173,28 @@ class CellSetting(QWidget):
     def rbTextSelected(self):
         self.leText.setEnabled(True)
         self.cbSystem.setDisabled(True)
-        self.cbMobile.setDisabled(True)
+        # self.cbMobile.setDisabled(True)
         self.fcbElement.setDisabled(True)
-        self.fcbEventCounter.setDisabled(True)
+        # self.fcbEventCounter.setDisabled(True)
         self.fcbValue.setDisabled(True)
-        self.cbArgument.setDisabled(True)
+        # self.cbArgument.setDisabled(True)
 
     def rbInformationElementSelected(self):
-        self.fcbEventCounter.setDisabled(True)
+        # self.fcbEventCounter.setDisabled(True)
         self.leText.setDisabled(True)
         self.cbSystem.setEnabled(True)
-        self.cbMobile.setEnabled(True)
+        # self.cbMobile.setEnabled(True)
         self.fcbElement.setEnabled(True)
         self.fcbValue.setEnabled(True)
-        self.cbArgument.setDisabled(True)
+        # self.cbArgument.setDisabled(True)
 
     def rbEventCounterSelected(self):
         self.cbSystem.setDisabled(True)
-        self.cbMobile.setDisabled(True)
+        # self.cbMobile.setDisabled(True)
         self.fcbElement.setDisabled(True)
-        self.fcbEventCounter.setEnabled(True)
+        # self.fcbEventCounter.setEnabled(True)
         self.fcbValue.setDisabled(True)
-        self.cbArgument.setDisabled(True)
+        # self.cbArgument.setDisabled(True)
         self.leText.setDisabled(True)
 
     def initializeEditorSelected(self):
@@ -318,9 +318,9 @@ class CellSetting(QWidget):
             customElements.append(self.fcbValue.currentText())
             customElements.append(self.fcbElement.currentText())
 
-        elif self.rbEventCounter.isChecked():
-            customElements.append("")
-            customElements.append("")
+        # elif self.rbEventCounter.isChecked():
+        #     customElements.append("")
+        #     customElements.append("")
 
         elif self.rbText.isChecked():
             # self.previous_window.data_set[self.row][self.column] = self.leText.text()

@@ -1063,7 +1063,7 @@ class AzenqosDialog(QMainWindow):
         self.timeSliderThread.set(value)
         gc.currentTimestamp = timestampValue
         gc.currentDateTimeString = "%s" % (
-            datetime.datetime.fromtimestamp(gc.currentTimestamp)
+            datetime.datetime.fromtimestamp(gc.currentTimestamp).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         )
         if len(gc.openedWindows) > 0:
             for window in gc.openedWindows:

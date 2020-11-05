@@ -104,8 +104,8 @@ class PropertiesWindow(QWidget):
             _translate("Properties", "Cell Content"),
         )
         self.editBtn.setText(_translate("Properties", "Edit"))
-        self.mobileLbl.setText(_translate("Properties", "Mobile"))
-        self.setAllBtn.setText(_translate("Properties", "Set All"))
+        # self.mobileLbl.setText(_translate("Properties", "Mobile"))
+        # self.setAllBtn.setText(_translate("Properties", "Set All"))
 
     def setupTableTab(self):
         self.Table = QWidget()
@@ -188,17 +188,17 @@ class PropertiesWindow(QWidget):
         self.editBtn.setDisabled(True)
         self.editBtn.clicked.connect(self.editBtnEvent)
 
-        self.mobileLbl = QLabel(self.CellContent)
-        self.mobileLbl.setGeometry(QRect(10, 210, 61, 31))
-        self.mobileLbl.setObjectName("mobileLbl")
+        # self.mobileLbl = QLabel(self.CellContent)
+        # self.mobileLbl.setGeometry(QRect(10, 210, 61, 31))
+        # self.mobileLbl.setObjectName("mobileLbl")
 
-        self.mobileCb = QComboBox(self.CellContent)
-        self.mobileCb.setGeometry(QRect(60, 210, 71, 31))
-        self.mobileCb.setObjectName("mobileCb")
+        # self.mobileCb = QComboBox(self.CellContent)
+        # self.mobileCb.setGeometry(QRect(60, 210, 71, 31))
+        # self.mobileCb.setObjectName("mobileCb")
 
-        self.setAllBtn = QPushButton(self.CellContent)
-        self.setAllBtn.setGeometry(QRect(130, 210, 91, 32))
-        self.setAllBtn.setObjectName("setAllBtn")
+        # self.setAllBtn = QPushButton(self.CellContent)
+        # self.setAllBtn.setGeometry(QRect(130, 210, 91, 32))
+        # self.setAllBtn.setObjectName("setAllBtn")
         self.tabWidget.addTab(self.CellContent, "")
 
     def setupComboBox(self):
