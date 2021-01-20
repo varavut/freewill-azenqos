@@ -1323,7 +1323,7 @@ class AzenqosDialog(QMainWindow):
                         "%s: timeChange7 hilightrow window %s"
                         % (os.path.basename(__file__), window.title)
                     )
-                    window.hilightRow(sampledate)
+                    window.hilightRow(sampledate,True)
                 else:
                     print(
                         "%s: timeChange7 movechart window %s"

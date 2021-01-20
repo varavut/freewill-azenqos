@@ -221,11 +221,11 @@ class TableWindow(QWidget):
         if isinstance(dataList, list):
             if self.rows and self.columns:
 
-                if len(dataList) >= self.rows:
-                    if self.rows < self.fetchRows:
-                        self.fetchRows = self.rows
+                # if len(dataList) >= self.rows:
+                #     if self.rows < self.fetchRows:
+                #         self.fetchRows = self.rows
 
-                    dataList = dataList[: self.fetchRows]
+                #     dataList = dataList[: self.fetchRows]
 
                 while len(dataList) < self.rows:
                     dataList.append([])
@@ -579,7 +579,7 @@ class TableWindow(QWidget):
                 self.tablename = "events"
                 self.dataList = SignalingDataQuery(
                     gc.azenqosDatabase, gc.currentDateTimeString
-                ).getEvents()
+                ).getEvents(pd_mode=False)
 
             elif self.title == "Signaling_Layer 1 Messages":
                 self.tableHeader = ["Time", "", "Eq.", "Name", "Info."]
@@ -592,7 +592,7 @@ class TableWindow(QWidget):
                 self.tablename = "signalling"
                 self.dataList = SignalingDataQuery(
                     gc.azenqosDatabase, gc.currentDateTimeString
-                ).getLayerThreeMessages()
+                ).getLayerThreeMessages(pd_mode=False)
             elif self.title == "Signaling_Benchmark":
                 self.tableHeader = ["", "MS1", "MS2", "MS3", "MS4"]
                 # self.tablename = 'signalling'
@@ -629,7 +629,7 @@ class TableWindow(QWidget):
                 self.setTableModel(self.dataList)
 
             if self.dataList is not None:
-                # self.setTableModel(self.dataList)
+                self.setTableModel(self.dataList)
                 self.tableViewCount = self.tableView.model().rowCount()
 
             # if self.tablename and self.tablename != "":
@@ -901,6 +901,10 @@ class TableWindow(QWidget):
         return activeSchema
 
     def queryFromSchema(self):
+
+        print(
+                "START: Query from schema"
+            )
         self.dataList = []
         for r in range(self.rows):
             content = []
@@ -909,7 +913,7 @@ class TableWindow(QWidget):
             self.dataList.append(content)
 
         result = CustomizeQuery(
-            gc.azenqosDatabase, self.appliedSchema, self, gc.currentDateTimeString
+            self.appliedSchema, self, gc.currentDateTimeString
         ).query()
         for data in result:
             self.dataList[data[1]][data[2]] = data[0]
@@ -1398,8 +1402,7 @@ class TableModel(QAbstractTableModel):
 
 
 class CustomizeQuery:
-    def __init__(self, database, inputData: list, window, globalTime: str):
-        self.db = database
+    def __init__(self, inputData: list, window, globalTime: str):
         self.inputData = inputData[:]
         self.tableWindow = window
         self.globalTime = globalTime
@@ -1417,102 +1420,111 @@ class CustomizeQuery:
         return arrs
 
     def query(self):
-        MAX_INGROUP = 64
-        self.allSelectedColumns = []
-        self.queryString = []
-        self.queryTable = []
-        uniqueTables = []
-        condition = ""
-        result = []
-        # inputdata = ['table','field','row',column']
-
-        for item in self.inputData:
-            if item["table"] == "global_time":
-                self.tableWindow.dataList[item["row"]][
-                    item["column"]
-                ] = gc.currentDateTimeString
-                self.inputData.remove(item)
-                break
-
-        key_func = lambda x: x["table"]
-        self.inputData = sorted(self.inputData, key=key_func)
-        self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
-
-        for group in self.groupedSchema:
-            if len(group) > MAX_INGROUP:
-                oldIndex = self.groupedSchema.index(group)
-                tempGroups = self.split(group, MAX_INGROUP)
-                self.groupedSchema.remove(group)
-                for newIndex, newGroup in enumerate(tempGroups):
-                    self.groupedSchema.insert(newIndex + oldIndex, newGroup)
-        pass
-
-        for tableIndex, schema in enumerate(self.groupedSchema):
-
-            if self.globalTime:
-                condition = "WHERE time <= '%s'" % (self.globalTime)
-
-            selectedColumns = []
-            uniqueColumns = []
-            thirdLvSub = []
-            tableData = None
-            for uniqueCol, data in enumerate(schema):
-                if len(data["field"]) > 0:
-                    selectedColumns.append(data["field"])
-                    uniqueColumns.append(data["field"] + "_%d" % uniqueCol)
-                    if not tableData:
-                        tableData = data["table"]
-                        self.queryTable.append(tableData)
-                        uniqueTables.append(tableData + "_%d" % tableIndex)
-                else:
-                    schema.remove(data)
-                    continue
-            self.allSelectedColumns += uniqueColumns
-
-            for indexCol, col in enumerate(selectedColumns):
-                innerSubQuery = (
-                    " IFNULL(( SELECT %s FROM %s %s ORDER BY time DESC LIMIT 1),NULL) AS %s "
-                    % (col, tableData, condition, uniqueColumns[indexCol])
+        try:
+            print(
+                    "START: Custom Query"
                 )
-                thirdLvSub.append(innerSubQuery)
+            MAX_INGROUP = 64
+            self.allSelectedColumns = []
+            self.queryString = []
+            self.queryTable = []
+            uniqueTables = []
+            condition = ""
+            result = []
+            # inputdata = ['table','field','row',column']
 
-            uniqueColumns = ",".join(uniqueColumns)
-            fullSubQuery = "(SELECT %s)" % (",".join(thirdLvSub))
-            queryString = "( SELECT * FROM %s LIMIT 1 ) %s " % (
-                fullSubQuery,
-                uniqueTables[tableIndex],
-            )
-            if not tableIndex == 0:
-                queryString = ", %s " % (queryString)
+            for item in self.inputData:
+                if item["table"] == "global_time":
+                    self.tableWindow.dataList[item["row"]][
+                        item["column"]
+                    ] = gc.currentDateTimeString
+                    self.inputData.remove(item)
+                    break
 
-            self.queryString.append(queryString)
+            key_func = lambda x: x["table"]
+            self.inputData = sorted(self.inputData, key=key_func)
+            self.groupedSchema = [list(j) for i, j in groupby(self.inputData, key_func)]
 
-        columnString = ",".join(self.allSelectedColumns)
-        joinString = " ".join(self.queryString)
-        queryAll = "SELECT %s FROM  %s" % (columnString, joinString)
+            for group in self.groupedSchema:
+                if len(group) > MAX_INGROUP:
+                    oldIndex = self.groupedSchema.index(group)
+                    tempGroups = self.split(group, MAX_INGROUP)
+                    self.groupedSchema.remove(group)
+                    for newIndex, newGroup in enumerate(tempGroups):
+                        self.groupedSchema.insert(newIndex + oldIndex, newGroup)
+            pass
 
-        if not self.db.isOpen():
-            self.db.open()
+            for tableIndex, schema in enumerate(self.groupedSchema):
 
-        query = QSqlQuery()
-        query.exec_(queryAll)
-        field_key = lambda x: x["field"]
-        if query.first():
-            for i in range(len(self.inputData)):
-                output = [
-                    str(query.value(i)),
-                    self.inputData[i]["row"],
-                    self.inputData[i]["column"],
-                ]
-                result.append(output)
-        else:
-            for i in range(len(self.inputData)):
-                output = ["", self.inputData[i]["row"], self.inputData[i]["column"]]
-                result.append(output)
-        self.db.close()
+                if self.globalTime:
+                    condition = "WHERE time <= '%s'" % (self.globalTime)
 
-        return result
+                selectedColumns = []
+                uniqueColumns = []
+                thirdLvSub = []
+                tableData = None
+                for uniqueCol, data in enumerate(schema):
+                    if len(data["field"]) > 0:
+                        selectedColumns.append(data["field"])
+                        uniqueColumns.append(data["field"] + "_%d" % uniqueCol)
+                        if not tableData:
+                            tableData = data["table"]
+                            self.queryTable.append(tableData)
+                            uniqueTables.append(tableData + "_%d" % tableIndex)
+                    else:
+                        schema.remove(data)
+                        continue
+                self.allSelectedColumns += uniqueColumns
 
+                for indexCol, col in enumerate(selectedColumns):
+                    innerSubQuery = (
+                        " IFNULL(( SELECT %s FROM %s %s ORDER BY time DESC LIMIT 1),NULL) AS %s "
+                        % (col, tableData, condition, uniqueColumns[indexCol])
+                    )
+                    thirdLvSub.append(innerSubQuery)
+
+                uniqueColumns = ",".join(uniqueColumns)
+                fullSubQuery = "(SELECT %s)" % (",".join(thirdLvSub))
+                queryString = "( SELECT * FROM %s LIMIT 1 ) %s " % (
+                    fullSubQuery,
+                    uniqueTables[tableIndex],
+                )
+                if not tableIndex == 0:
+                    queryString = ", %s " % (queryString)
+
+                self.queryString.append(queryString)
+
+            columnString = ",".join(self.allSelectedColumns)
+            joinString = " ".join(self.queryString)
+            queryAll = "SELECT %s FROM  %s" % (columnString, joinString)
+
+            with sqlite3.connect(gc.databasePath) as dbcon:
+                cur = dbcon.cursor()
+                cur.execute(queryAll)
+                qresult = cur.fetchall()
+                field_key = lambda x: x["field"]
+                if len(qresult) != 0:
+                    for i in range(len(list(qresult[0]))):
+                        output = [
+                            str(qresult[0][i]),
+                            self.inputData[i]["row"],
+                            self.inputData[i]["column"],
+                        ]
+                        result.append(output)
+                else:
+                    for i in range(len(self.inputData)):
+                        output = ["", self.inputData[i]["row"], self.inputData[i]["column"]]
+                        result.append(output)
+                print(
+                        "END: Custom Query"
+                    )
+                print(
+                    result
+                )
+
+            return result
+        except Exception as e :
+            print(e)
 
 class PdTableModel(QAbstractTableModel):
     def __init__(self, df, parent=None, *args):
