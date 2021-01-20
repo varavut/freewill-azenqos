@@ -1513,19 +1513,18 @@ class AzenqosDialog(QMainWindow):
         if parent == "GSM":
             if child == "Radio Parameters":
                 if hasattr(self, "gsm_rdp_window") is True:
-                    tableWindow = self.gsm_rdp_window.widget()
-                    tableWidget = None
-                    if not tableWindow:
+                    tableWindow = self.gsm_rdp_window
+                    tableWidget = self.gsm_rdp_window.widget()
+                    if not tableWidget:
                         tableWidget = TableWindow(self.gsm_rdp_window, windowName)
                         gc.openedWindows.append(tableWidget)
-
-                    if self.gsm_rdp_window not in subwindowList:
-                        self.gsm_rdp_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.gsm_rdp_window)
+                        tableWindow = SubWindowArea(self.mdi)
+                        self.mdi.addSubWindow(tableWindow)       
 
                     if tableWidget:
-                        self.gsm_rdp_window.setWidget(tableWidget)
-                    self.gsm_rdp_window.show()
+                        tableWindow.setWidget(tableWidget)
+                        self.mdi.addSubWindow(tableWindow)
+                    tableWindow.show()
                 else:
                     # create new subwindow
                     self.gsm_rdp_window = SubWindowArea(self.mdi)

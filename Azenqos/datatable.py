@@ -923,7 +923,7 @@ class TableWindow(QWidget):
     def setHeader(self, headers):
         # self.tableHeader = headers
         self.customHeader = headers
-        self.updateTableModelData(self.dataList)
+        # self.updateTableModelData(self.dataList)
         # self.filterHeader.setFilterBoxes(len(self.tableHeader), self)
 
     def generateMenu(self, pos):
