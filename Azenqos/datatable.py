@@ -1510,8 +1510,13 @@ class CustomizeQuery:
                 field_key = lambda x: x["field"]
                 if len(qresult) != 0:
                     for i in range(len(list(qresult[0]))):
+                        value = ""
+                        if(qresult[0][i] is None):
+                            value = ""
+                        else:
+                            value = qresult[0][i]
                         output = [
-                            str(qresult[0][i]),
+                            str(value),
                             self.inputData[i]["row"],
                             self.inputData[i]["column"],
                         ]
