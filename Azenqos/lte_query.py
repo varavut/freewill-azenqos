@@ -297,7 +297,7 @@ class LteDataQuery:
             {"name": "SIB1 MNC", "column": ["lte_sib1_mnc"], "table": "lte_sib1_info"},
             {"name": "SIB1 TAC", "column": ["lte_sib1_tac"], "table": "lte_sib1_info"},
             {
-                "name": "SIB1  ECI (Cell ID)",
+                "name": "SIB1 ECI (Cell ID)",
                 "column": ["lte_sib1_eci"],
                 "table": "lte_sib1_info",
             },
@@ -312,17 +312,10 @@ class LteDataQuery:
                 "table": "lte_sib1_info",
             },
             {
-                "name": "SIB1 LCI",
-                "column": ["lte_sib1_local_cell_id"],
-                "table": "lte_sib1_info",
-            },
-            {"name": "Time", "column": ["time"], "table": "lte_rrc_transmode_info"},
-            {
                 "name": "Transmission Mode (RRC-tm)",
                 "column": ["lte_transmission_mode_l3"],
                 "table": "lte_rrc_transmode_info",
             },
-            {"name": "Time", "column": ["time"], "table": "lte_rrc_state"},
             {
                 "name": "RRC State",
                 "column": ["lte_rrc_state"],
