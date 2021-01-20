@@ -115,8 +115,10 @@ class TableWindow(QWidget):
             QTableCornerButton::section{border-width: 0px; border-color: #BABABA; border-style:solid;}
             """
         )
-        # self.refreshTableContents(create_table_model=True)
-        self.specifyTablesHeader()
+        if self.title in ["Signaling_Events", "Signaling_Layer 3 Messages"]:
+            self.refreshTableContents(create_table_model=True)
+        else:
+            self.specifyTablesHeader()
 
         # Attach header to table, create text filter
         self.tableView.setHorizontalHeader(self.filterHeader)
