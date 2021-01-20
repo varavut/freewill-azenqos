@@ -290,6 +290,47 @@ class LteDataQuery:
 
         return elementDictList
 
+    def getRrcSibStates(self):
+        elementDictList = [
+            {"name": "Time", "column": ["global_time"], "table": "global_time"},
+            {"name": "SIB1 MCC", "column": ["lte_sib1_mcc"], "table": "lte_sib1_info"},
+            {"name": "SIB1 MNC", "column": ["lte_sib1_mnc"], "table": "lte_sib1_info"},
+            {"name": "SIB1 TAC", "column": ["lte_sib1_tac"], "table": "lte_sib1_info"},
+            {
+                "name": "SIB1  ECI (Cell ID)",
+                "column": ["lte_sib1_eci"],
+                "table": "lte_sib1_info",
+            },
+            {
+                "name": "SIB1 eNodeB ID",
+                "column": ["lte_sib1_enb_id"],
+                "table": "lte_sib1_info",
+            },
+            {
+                "name": "SIB1 LCI",
+                "column": ["lte_sib1_local_cell_id"],
+                "table": "lte_sib1_info",
+            },
+            {
+                "name": "SIB1 LCI",
+                "column": ["lte_sib1_local_cell_id"],
+                "table": "lte_sib1_info",
+            },
+            {"name": "Time", "column": ["time"], "table": "lte_rrc_transmode_info"},
+            {
+                "name": "Transmission Mode (RRC-tm)",
+                "column": ["lte_transmission_mode_l3"],
+                "table": "lte_rrc_transmode_info",
+            },
+            {"name": "Time", "column": ["time"], "table": "lte_rrc_state"},
+            {
+                "name": "RRC State",
+                "column": ["lte_rrc_state"],
+                "table": "lte_rrc_state",
+            },
+        ]
+        return elementDictList
+
     def get_rrc_sib_states():
         with sqlite3.connect(gc.databasePath) as dbcon:
             return get_nr_radio_params_disp_df(dbcon, self.timeFilter)

@@ -454,6 +454,13 @@ class TableWindow(QWidget):
                         gc.azenqosDatabase, gc.currentDateTimeString
                     ).getServingAndNeighbors()
                 )
+            elif self.title == "LTE_LTE RRC/SIB States":
+                self.tableHeader = ["Element", "Value"]
+                self.appliedSchema = self.initializeQuerySchema(
+                    LteDataQuery(
+                        gc.azenqosDatabase, gc.currentDateTimeString
+                    ).getRrcSibStates()
+                )
             elif self.title == "LTE_PUCCH/PDSCH Parameters":
                 self.tableHeader = ["Element", "Value"]
                 self.appliedSchema = self.initializeQuerySchema(
@@ -902,9 +909,7 @@ class TableWindow(QWidget):
 
     def queryFromSchema(self):
 
-        print(
-                "START: Query from schema"
-            )
+        print("START: Query from schema")
         self.dataList = []
         for r in range(self.rows):
             content = []
@@ -1421,9 +1426,7 @@ class CustomizeQuery:
 
     def query(self):
         try:
-            print(
-                    "START: Custom Query"
-                )
+            print("START: Custom Query")
             MAX_INGROUP = 64
             self.allSelectedColumns = []
             self.queryString = []
@@ -1513,18 +1516,19 @@ class CustomizeQuery:
                         result.append(output)
                 else:
                     for i in range(len(self.inputData)):
-                        output = ["", self.inputData[i]["row"], self.inputData[i]["column"]]
+                        output = [
+                            "",
+                            self.inputData[i]["row"],
+                            self.inputData[i]["column"],
+                        ]
                         result.append(output)
-                print(
-                        "END: Custom Query"
-                    )
-                print(
-                    result
-                )
+                print("END: Custom Query")
+                print(result)
 
             return result
-        except Exception as e :
+        except Exception as e:
             print(e)
+
 
 class PdTableModel(QAbstractTableModel):
     def __init__(self, df, parent=None, *args):
