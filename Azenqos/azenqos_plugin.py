@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2019-03-18
         git sha              : $Format:%H$
-        copyright            : (C) 2019 by Metamedia Techonology Co.,Ltd
+        copyright            : Copyright (C) 2019-2020 Freewill FX Co., Ltd. All rights reserved
         email                : gritmanoch@longdo.com
  ***************************************************************************/
 
@@ -175,6 +175,11 @@ class Azenqos:
         self.first_start = True
 
     def unload(self):
+        print("azenqos_plugin: unload()")
+        if self.dlg is not None:
+            if hasattr(self.dlg, "azenqosMainMenu") is True:
+                self.dlg.azenqosMainMenu.cleanup()
+                self.dlg.azenqosMainMenu.close()
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(self.tr(u"&Azenqos"), action)

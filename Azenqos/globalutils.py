@@ -1,6 +1,7 @@
 from PyQt5.QtSql import QSql, QSqlDatabase, QSqlQuery
 import csv, inspect, os, sys, datetime, json, io
 from zipfile import ZipFile
+import shutil
 
 # Adding folder path
 sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
@@ -185,32 +186,32 @@ class Utils:
         pass
 
     def unzipToFile(self, currentPath, filePath):
-        file_folder_path = currentPath + "/file"
-        if not os.path.exists(file_folder_path):
-            os.makedirs(file_folder_path)
-        file_list = os.listdir(file_folder_path)
-        if len(file_list) > 0:
-            for f in file_list:
-                os.remove(file_folder_path + "/" + f)
-        if len(os.listdir(file_folder_path)) == 0:
-            with ZipFile(filePath, "r") as zip_obj:
-                filesContain = zip_obj.namelist()
-                for fileName in filesContain:
-                    try:
-                        zip_obj.extract(fileName, file_folder_path)
-                    except:
-                        pass
-
-            db_file_path = file_folder_path + "/azqdata.db"
-            return db_file_path
+        gc.logPath = currentPath + "/file/" + str(os.getpid())
+        try:
+            if not os.path.exists(currentPath + "/file"):
+                os.mkdir(currentPath + "/file")
+            if not os.path.exists(gc.logPath):
+                os.mkdir(gc.logPath)
+            else:
+                shutil.rmtree(gc.logPath)
+                os.mkdir(gc.logPath)
+            if len(os.listdir(gc.logPath)) == 0:
+                with ZipFile(filePath, "r") as zip_obj:
+                    filesContain = zip_obj.namelist()
+                    for fileName in filesContain:
+                        zip_obj.extract(fileName, gc.logPath)
+                db_file_path = gc.logPath + "/azqdata.db"
+                return db_file_path
+        except Exception as e:
+            print(e)
 
     def cleanupFile(self, currentPath):
-        file_folder_path = currentPath + "/file"
-        file_list = os.listdir(file_folder_path)
+        # gc.logPath = currentPath + "/" + os.path.basename(filePath)
+        file_list = os.listdir(gc.logPath)
         try:
             if len(file_list) > 0:
                 for f in file_list:
-                    os.remove(file_folder_path + "/" + f)
+                    os.remove(gc.logPath + "/" + f)
         except:
             return False
 
@@ -385,16 +386,19 @@ class Utils:
         return False
 
     def openConnection(self, db: QSqlDatabase):
+        print("%s: openConnection" % os.path.basename(__file__))
         if db:
             if not db.isOpen():
                 db.open()
 
     def closeConnection(self, db: QSqlDatabase):
+        print("%s: closeConnection" % os.path.basename(__file__))
         if db:
             if db.isOpen():
                 db.close()
 
     def datetimeStringtoTimestamp(self, datetimeString: str):
+        # print("%s: datetimestringtotimestamp" % os.path.basename(__file__))
         try:
             element = datetime.datetime.strptime(datetimeString, "%Y-%m-%d %H:%M:%S.%f")
             timestamp = datetime.datetime.timestamp(element)
@@ -402,59 +406,3 @@ class Utils:
         except Exception as ex:
             print(ex)
             return False
-
-
-# todo: dynamic data query object
-# class DataQuery:
-#     def __inti__(self, fieldArr, tableName, conditionStr):
-#         self.fieldArr = fieldArr
-#         self.tableName = tableName
-#         self.condition = conditionStr
-
-#     def countField(self):
-#         fieldCount = 0
-#         if self.fieldArr is not None:
-#             fieldCount = len(self.fieldArr)
-#         return fieldCount
-
-#     def selectFieldToQuery(self):
-#         selectField = '*'
-#         if self.fieldArr is not None:
-#             selectField = ",".join(self.fieldArr)
-#         return selectField
-
-#     def getData(self):
-#         result = dict()
-#         selectField = self.selectFieldToQuery()
-#         azenqosDatabase.open()
-#         query = QSqlQuery()
-#         queryString = 'select %s from %s' % (selectField, self.tableName)
-#         query.exec_(queryString)
-#         while query.next():
-#             for field in range(len(self.fieldArr)):
-#                 fieldName = fieldArr[field]
-#                 validatedValue = self.valueValidation(query.value(field))
-#                 if fieldName in result:
-#                     if isinstance(result[fieldName], list):
-#                         result[fieldName].append(validatedValue)
-#                     else:
-#                         result[fieldName] = [validatedValue]
-#                 else:
-#                     result[fieldName] = [validatedValue]
-#         azenqosDatabase.close()
-#         return result
-
-# def valueValidation(self, value):
-#     validatedValue = 0
-#     if value is not None:
-#         validatedValue = value
-#     return validatedValue
-
-
-# if __name__ == '__main__':
-#     addDatabase()
-#     element = ElementInfo()
-#     element.checkCsv()
-#     print(element.searchName('SINR\tRx[0]', elementData))
-#     element.getTableAttr('SINR\tRx[0]')
-# element.getTableAttr()

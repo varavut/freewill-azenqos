@@ -1,4 +1,7 @@
 from PyQt5.QtSql import QSqlQuery, QSqlDatabase
+import pandas as pd
+import global_config as gc
+import params_disp_df
 
 
 class SignalingDataQuery:
@@ -8,9 +11,17 @@ class SignalingDataQuery:
         if currentDateTimeString:
             self.timeFilter = currentDateTimeString
 
-    def getEvents(self):
+    def getEvents(self, pd_mode=True):
+        if pd_mode:
+            df = pd.read_sql(
+                "SELECT ev.time, ev.name, ev.info FROM events ev UNION ALL SELECT pm.time, 'MOS Score' as name, CAST(pm.polqa_mos AS CHAR) FROM polqa_mos pm WHERE pm.polqa_mos IS NOT NULL ORDER BY time",
+                gc.dbcon,
+                # parse_dates=["time"], after comment millisecond of time is 3 decimals
+            )
+            return df
+
         self.openConnection()
-        queryString = "SELECT time, name, info FROM events"
+        queryString = "SELECT ev.time, ev.name, ev.info FROM events ev UNION ALL SELECT pm.time, 'MOS Score' as name, CAST(pm.polqa_mos AS CHAR) FROM polqa_mos pm WHERE pm.polqa_mos IS NOT NULL ORDER BY time"
         query = QSqlQuery()
         query.exec_(queryString)
         timeField = query.record().indexOf("time")
@@ -25,7 +36,14 @@ class SignalingDataQuery:
         self.closeConnection()
         return dataList
 
-    def getLayerOneMessages(self):  ##ต้องแก้ query
+    """
+    def getLayerOneMessages(self, pd_mode=True):  ##ต้องแก้ query
+        if pd_mode:
+            df = pd.read_sql(
+                "SELECT time, name, info FROM events", gc.dbcon, parse_dates=["time"]
+            )
+            return df
+
         self.openConnection()
         query = QSqlQuery()
         query.exec_("SELECT * FROM events")
@@ -40,8 +58,17 @@ class SignalingDataQuery:
             dataList.append([timeValue, "", "MS1", nameValue, detailStrValue])
         self.closeConnection()
         return dataList
+        """
 
-    def getLayerThreeMessages(self):
+    def getLayerThreeMessages(self, pd_mode=True):
+        if pd_mode:
+            df = pd.read_sql(
+                "SELECT time, name, symbol, protocol, detail_str FROM signalling",
+                gc.dbcon,
+                # parse_dates=["time"], after comment millisecond of time is 3 decimals
+            )
+            return df
+
         self.openConnection()
         query = QSqlQuery()
         query.exec_("SELECT time, name, symbol, protocol, detail_str FROM signalling")

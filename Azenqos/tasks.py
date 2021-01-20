@@ -14,7 +14,7 @@ from PyQt5.QtGui import *
 from qgis.core import *
 from qgis.utils import *
 from qgis.gui import *
-from .globalutils import Utils
+from globalutils import Utils
 
 
 class LayerTask(QgsTask):
@@ -28,7 +28,12 @@ class LayerTask(QgsTask):
 
     def addMapToQgis(self):
         # urlWithParams = 'type=xyz&url=http://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0&crs=EPSG3857'
-        urlWithParams = "type=xyz&url=http://ms.longdo.com/mmmap/img.php?zoom%3D%7Bz%7D%26x%3D%7Bx%7D%26y%3D%7By%7D%26mode%3Dicons%26key%3D93842be739d77f83f6b31c57ae56887f%26proj%3Depsg3857%26HD%3D1&zmax=18&zmin=0"
+        # urlWithParams = "type=xyz&url=http://ms.longdo.com/mmmap/img.php?zoom%3D%7Bz%7D%26x%3D%7Bx%7D%26y%3D%7By%7D%26mode%3Dicons%26key%3D93842be739d77f83f6b31c57ae56887f%26proj%3Depsg3857%26HD%3D1&zmax=18&zmin=0"
+
+        urlWithParams = (
+            "type=xyz&url=http://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png"
+        )
+
         rlayer = QgsRasterLayer(urlWithParams, "Street map", "wms")
         if rlayer.isValid():
             QgsProject.instance().addMapLayer(rlayer)
@@ -55,9 +60,11 @@ class LayerTask(QgsTask):
                     try:
                         if child.layer().type() == QgsMapLayerType.VectorLayer:
                             extent.combineExtentWith(child.layer().extent())
-                    except NameError as ne:
+                    except Exception as ne:
                         print(
-                            "check QgsMapLayerType.VectorLayer failed - try fallback to alt method"
+                            "check QgsMapLayerType.VectorLayer failed: {} - try fallback to alt method".format(
+                                ne
+                            )
                         )
                         if child.layer().type() == 0:
                             extent.combineExtentWith(child.layer().extent())
@@ -74,9 +81,6 @@ class LayerTask(QgsTask):
         if result:
             gc.mostFeaturesLayer = None
             self.addMapToQgis()
-            uri = QgsDataSourceUri()
-            uri.setDatabase(self.dbPath)
-            gc.tableList.sort(reverse=True)
             geom_column = "geom"
             vlayer = iface.addVectorLayer(self.dbPath, None, "ogr")
 
@@ -85,30 +89,6 @@ class LayerTask(QgsTask):
             QgsProject.instance().setCrs(my_crs)
 
             self.zoomToActiveLayer()
-
-            # vlayer
-            # for tableName in gc.tableList:
-            #     uri.setDataSource("", tableName, geom_column)
-            #     vlayer = iface.addVectorLayer(uri.uri(), tableName, "spatialite")
-            #     features = vlayer.featureCount()
-            #     if gc.mostFeaturesLayer is None:
-            #         gc.mostFeaturesLayer = (tableName, features)
-            #     elif features > gc.mostFeaturesLayer[1]:
-            #         gc.mostFeaturesLayer = (tableName, features)
-
-            #     if vlayer:
-            #         symbol_renderer = vlayer.renderer()
-            #         if symbol_renderer:
-            #             symbol = symbol_renderer.symbol()
-            #             symbol.setColor(QColor(125, 139, 142))
-            #             symbol.symbolLayer(0).setStrokeColor(QColor(0, 0, 0))
-            #             symbol.setSize(2.4)
-            #         iface.layerTreeView().refreshLayerSymbology(vlayer.id())
-            #         vlayer.triggerRepaint()
-            #         if not tableName in gc.activeLayers:
-            #             gc.activeLayers.append(tableName)
-
-            # iface.mapCanvas().setSelectionColor(QColor("yellow"))
 
             elapsed_time = time.time() - self.start_time
             QgsMessageLog.logMessage(
@@ -145,16 +125,6 @@ class QuitTask(QgsTask):
             "[-- Start Removing Dependencies --]", tag="Processing"
         )
         self.start_time = time.time()
-
-        gc.azenqosDatabase.close()
-        QSqlDatabase.removeDatabase(gc.azenqosDatabase.connectionName())
-        names = QSqlDatabase.connectionNames()
-        for name in names:
-            QSqlDatabase.database(name).close()
-            QSqlDatabase.removeDatabase(name)
-
-        gc.azenqosDatabase = None
-
         return True
 
     def finished(self, result):
@@ -183,3 +153,17 @@ class QuitTask(QgsTask):
                     tag="Exception",
                 )
                 raise self.exception
+
+
+def close_db():
+    if gc.dbcon:
+        gc.dbcon.close()
+        gc.dbcon = None
+    if gc.azenqosDatabase:
+        gc.azenqosDatabase.close()
+        QSqlDatabase.removeDatabase(gc.azenqosDatabase.connectionName())
+        names = QSqlDatabase.connectionNames()
+        for name in names:
+            QSqlDatabase.database(name).close()
+            QSqlDatabase.removeDatabase(name)
+        gc.azenqosDatabase = None

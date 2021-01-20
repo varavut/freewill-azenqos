@@ -1,12 +1,17 @@
 import os
 from PyQt5.QtCore import *
+from PyQt5 import QtCore
 
+DEFAULT_LOOKBACK_DUR_MILLIS = 2000
 maxColumns = 50
 maxRows = 1000
 schemaList = []
 activeLayers = []
+mdi = None
 mostFeaturesLayer = None
 azenqosDatabase = None
+databasePath = None
+dbcon = None
 minTimeValue = None
 maxTimeValue = None
 fastForwardValue = 1
@@ -20,7 +25,7 @@ openedWindows = []
 timeSlider = None
 isSliderPlay = False
 allLayers = []
-tableList = []
+# tableList = []
 h_list = []
 linechartWindowname = [
     "GSM_GSM Line Chart",
@@ -31,7 +36,7 @@ linechartWindowname = [
     "Data_LTE Data Line Chart",
     "Data_5G NR Data Line Chart",
 ]
-threadpool = QThreadPool()
+threadpool = QThreadPool.globalInstance()
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 graduatedFeatures = {
     # 4G Section
@@ -292,3 +297,5 @@ graduatedFeatures = {
         ],
     },
 }
+FILE_PATH = os.path.join(CURRENT_PATH, "file")
+logPath = None

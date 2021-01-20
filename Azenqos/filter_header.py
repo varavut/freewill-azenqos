@@ -9,6 +9,7 @@ class SortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):
         QSortFilterProxyModel.__init__(self, *args, **kwargs)
         self.filters = {}
+        self.filterFromMenu = {}
 
     def setFilterByColumn(self, regex, column):
         self.filters[column] = regex
@@ -20,6 +21,14 @@ class SortFilterProxyModel(QSortFilterProxyModel):
             if ix.isValid():
                 if regex.indexIn(str(self.sourceModel().dataString(ix))) == -1:
                     return False
+
+        if self.filterFromMenu:
+            for key, regexlist in self.filterFromMenu.items():
+                ix = self.sourceModel().index(source_row, key, source_parent)
+                if ix.isValid():
+                    if str(self.sourceModel().dataString(ix)) not in regexlist:
+                        return False
+
         return True
 
 

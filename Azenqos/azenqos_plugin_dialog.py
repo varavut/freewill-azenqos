@@ -8,7 +8,7 @@
                              -------------------
         begin                : 2019-03-18
         git sha              : $Format:%H$
-        copyright            : (C) 2019 by Metamedia Techonology Co.,Ltd
+        copyright            : Copyright (C) 2019-2020 Freewill FX Co., Ltd. All rights reserved
         email                : gritmanoch@longdo.com
  ***************************************************************************/
 
@@ -24,6 +24,7 @@
 import datetime
 import threading
 import sys
+import traceback
 import os
 import csv
 
@@ -33,6 +34,10 @@ sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
 import pyqtgraph as pg
 import numpy as np
 import global_config as gc
+
+import tasks
+import azq_utils
+import shutil
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -47,9 +52,11 @@ from .cdma_evdo_query import CdmaEvdoQuery
 from .globalutils import Utils
 from .linechart import *
 from .worker import Worker
-from .tasks import *
 from .timeslider import *
 from .datatable import *
+from atomic_int import atomic_int
+
+GUI_SETTING_NAME_PREFIX = "azenqos_plugin_dialog/"
 
 
 def clearAllSelectedFeatures():
@@ -70,9 +77,25 @@ def removeAzenqosGroup():
 
 
 class AzenqosDialog(QMainWindow):
+
+    company_name = "freewill_fx"
+    software_name = "azenqos_qgis_plugin"
+
+    timechange_service_thread = None
+    timechange_to_service_counter = atomic_int(0)
+    closed = False
+
+    signal_ui_thread_emit_time_slider_updated = pyqtSignal(float)
+
     def __init__(self, databaseUi):
         """Constructor."""
+        self.settings = QSettings(
+            azq_utils.get_local_fp("settings.ini"), QSettings.IniFormat
+        )
         super(AzenqosDialog, self).__init__(None)
+        self.signal_ui_thread_emit_time_slider_updated.connect(
+            self.ui_thread_emit_time_slider_updated
+        )
         self.timeSliderThread = timeSliderThread()
         self.newImport = False
         self.posObjs = []
@@ -95,11 +118,136 @@ class AzenqosDialog(QMainWindow):
         root = QgsProject.instance().layerTreeRoot()
         root.addedChildren.connect(self.mergeLayerGroup)
         QgsProject.instance().layerWillBeRemoved.connect(self.removingTreeLayer)
+        self.timechange_service_thread = Worker(self.timeChangedWorkerFunc)
+        gc.threadpool.start(self.timechange_service_thread)
+        self._gui_restore()
+
+    def ui_thread_emit_time_slider_updated(self, timestamp):
+        print("ui_thread_emit_time_slider_updated")
+        sampledate = datetime.datetime.fromtimestamp(timestamp)
+        self.timeEdit.setDateTime(sampledate)
+
+    def _gui_save(self):
+        # mod from https://stackoverflow.com/questions/23279125/python-pyqt4-functions-to-save-and-restore-ui-widget-values
+        """
+        save "ui" controls and values to registry "setting"
+        :return:
+        """
+        try:
+            print("_gui_save() START")
+            print("_gui_save() geom")
+            self.settings.setValue(
+                GUI_SETTING_NAME_PREFIX + "geom", self.saveGeometry()
+            )
+            print("_gui_save() state")
+            self.settings.setValue(GUI_SETTING_NAME_PREFIX + "state", self.saveState())
+
+            swl = self.mdi.subWindowList()
+            swl = [w for w in swl if (w is not None and w.widget() is not None)]
+            print(
+                "_gui_save() len(swl)",
+                len(swl),
+                "len(gc.openedWindows)",
+                len(gc.openedWindows),
+            )
+            self.settings.setValue(GUI_SETTING_NAME_PREFIX + "n_windows", len(swl))
+            if swl:
+                self.settings.setValue(GUI_SETTING_NAME_PREFIX + "n_windows", len(swl))
+                i = -1
+                for window in swl:
+                    # window here is a subwindow: class SubWindowArea(QMdiSubWindow)
+                    if not window.widget():
+                        continue
+                    print(
+                        "_gui_save() window_{}_title".format(i), window.widget().title
+                    )
+                    i += 1
+                    self.settings.setValue(
+                        GUI_SETTING_NAME_PREFIX + "window_{}_title".format(i),
+                        window.widget().title,
+                    )
+                    self.settings.setValue(
+                        GUI_SETTING_NAME_PREFIX + "window_{}_geom".format(i),
+                        window.saveGeometry(),
+                    )
+                    # tablewindows dont have saveState() self.settings.setValue(GUI_SETTING_NAME_PREFIX + "window_{}_state".format(i), window.saveState())
+
+            self.settings.sync()  # save to disk
+            print("_gui_save() DONE")
+        except:
+            type_, value_, traceback_ = sys.exc_info()
+            exstr = str(traceback.format_exception(type_, value_, traceback_))
+            print("WARNING: _gui_save() - exception: {}".format(exstr))
+
+    def _gui_restore(self):
+        """
+        restore "ui" controls with values stored in registry "settings"
+        :return:
+        """
+        try:
+            print("_gui_restore() START")
+            self.settings.sync()  # load from disk
+            window_geom = self.settings.value(GUI_SETTING_NAME_PREFIX + "geom")
+            if window_geom:
+                print("_gui_restore() geom")
+                self.restoreGeometry(window_geom)
+            """
+            state_value = self.settings.value(GUI_SETTING_NAME_PREFIX + "state")
+            if state_value:
+                print("_gui_restore() state")
+                self.restoreState(state_value)
+            """
+            n_windows = self.settings.value(GUI_SETTING_NAME_PREFIX + "n_windows")
+            if n_windows:
+                n_windows = int(n_windows)
+                for i in range(n_windows):
+                    title = self.settings.value(
+                        GUI_SETTING_NAME_PREFIX + "window_{}_title".format(i)
+                    )
+                    geom = self.settings.value(
+                        GUI_SETTING_NAME_PREFIX + "window_{}_geom".format(i)
+                    )
+                    print("_gui_restore() window i {} title {}".format(i, title))
+                    if title and "_" in title:
+                        parts = title.split("_", 1)
+                        if len(parts) == 2:
+                            print("")
+                            print(
+                                "_gui_restore() window i {} title {} openwindow".format(
+                                    i, title
+                                )
+                            )
+                            self.classifySelectedItems(parts[0], parts[1])
+                    if geom:
+                        for window in self.mdi.subWindowList():
+                            if not window.widget():
+                                continue
+                            if window.widget().title == title:
+                                print(
+                                    "_gui_restore() window i {} title {} setgeom".format(
+                                        i, title
+                                    )
+                                )
+                                window.restoreGeometry(geom)
+                                break
+
+            print("_gui_restore() DONE")
+        except:
+            type_, value_, traceback_ = sys.exc_info()
+            exstr = str(traceback.format_exception(type_, value_, traceback_))
+            print("WARNING: _gui_restore() - exception: {}".format(exstr))
+            try:
+                print("doing qsettings clear()")
+                self.settings.clear()
+            except:
+                type_, value_, traceback_ = sys.exc_info()
+                exstr = str(traceback.format_exception(type_, value_, traceback_))
+                print("WARNING: qsettings clear() - exception: {}".format(exstr))
 
     def initializeSchema(self):
         dirname = os.path.dirname(__file__)
         fileDir = os.path.join(dirname, "element_info_list.csv")
-        with open(fileDir, "r") as f:
+        with open(fileDir, "r", encoding="utf-8") as f:
             reader = csv.reader(f)
             for row in reader:
                 gc.schemaList.append(
@@ -114,12 +262,13 @@ class AzenqosDialog(QMainWindow):
     def renamingLayers(self, layers):
 
         # Configure layers data source + rename layers
-        uri = QgsDataSourceUri()
-        uri.setDatabase(self.databaseUi.databasePath)
+        # uri = QgsDataSourceUri()
+        # uri.setDatabase(self.databaseUi.databasePath)
         root = QgsProject.instance().layerTreeRoot()
         treeGroups = root.findGroups()
         geom_column = "geom"
         for layer in layers:
+            print("renamingLayers: ", layer.name())
             name = layer.name().split(" ")
             if name[0] == "azqdata":
 
@@ -138,8 +287,8 @@ class AzenqosDialog(QMainWindow):
                 # Setting up layer data source
                 layer.setName(" ".join(name[1:]))
                 gc.activeLayers.append(" ".join(name[1:]))
-                uri.setDataSource("", " ".join(name[1:]), geom_column)
-                layer.setDataSource(uri.uri(), " ".join(name[1:]), "spatialite")
+                # uri.setDataSource("", " ".join(name[1:]), geom_column)
+                # layer.setDataSource(uri.uri(), " ".join(name[1:]), "spatialite")
 
                 # Handling layer customize style
                 layer.styleChanged.connect(self.handleStyleChange)
@@ -283,6 +432,8 @@ class AzenqosDialog(QMainWindow):
         self.menuFile.setObjectName("menuFile")
         self.menuPresentation = QMenu(self.menubar)
         self.menuPresentation.setObjectName("menuPresentation")
+        self.menuWindows = QMenu(self.menubar)
+        self.menuWindows.setObjectName("menuWindows")
         self.menuGSM = QMenu(self.menuPresentation)
         self.menuGSM.setObjectName("menuGSM")
         self.menuWCDMA = QMenu(self.menuPresentation)
@@ -320,14 +471,8 @@ class AzenqosDialog(QMainWindow):
         self.actionActive_Monitored_Sets.setObjectName("actionActive_Monitored_Sets")
         self.actionRadio_Parameters_2 = QAction(AzenqosDialog)
         self.actionRadio_Parameters_2.setObjectName("actionRadio_Parameters_2")
-        self.actionActive_Set_List = QAction(AzenqosDialog)
-        self.actionActive_Set_List.setObjectName("actionActive_Set_List")
-        self.actionMonitoSet_List = QAction(AzenqosDialog)
-        self.actionMonitoSet_List.setObjectName("actionMonitoSet_List")
         self.actionBLER_Summary = QAction(AzenqosDialog)
         self.actionBLER_Summary.setObjectName("actionBLER_Summary")
-        self.actionBLER_Transport_Channel = QAction(AzenqosDialog)
-        self.actionBLER_Transport_Channel.setObjectName("actionBLER_Transport_Channel")
         self.actionLine_Chart = QAction(AzenqosDialog)
         self.actionLine_Chart.setObjectName("actionLine_Chart")
         self.actionBearers = QAction(AzenqosDialog)
@@ -336,10 +481,6 @@ class AzenqosDialog(QMainWindow):
         self.actionPilot_Poluting_Cells.setObjectName("actionPilot_Poluting_Cells")
         self.actionActive_Monitored_Bar = QAction(AzenqosDialog)
         self.actionActive_Monitored_Bar.setObjectName("actionActive_Monitored_Bar")
-        self.actionCM_GSM_Reports = QAction(AzenqosDialog)
-        self.actionCM_GSM_Reports.setObjectName("actionCM_GSM_Reports")
-        self.actionCM_GSM_Cells = QAction(AzenqosDialog)
-        self.actionCM_GSM_Cells.setObjectName("actionCM_GSM_Cells")
         self.actionPilot_Analyzer = QAction(AzenqosDialog)
         self.actionPilot_Analyzer.setObjectName("actionPilot_Analyzer")
         self.actionRadio_Parameters_3 = QAction(AzenqosDialog)
@@ -350,12 +491,18 @@ class AzenqosDialog(QMainWindow):
         self.actionServing_Neighbors_2.setObjectName("actionServing_Neighbors_2")
         self.actionPUCCH_PDSCH_Parameters = QAction(AzenqosDialog)
         self.actionPUCCH_PDSCH_Parameters.setObjectName("actionPUCCH_PDSCH_Parameters")
+        self.actionData = QAction(AzenqosDialog)
+        self.actionData.setObjectName("actionData")
         self.actionLTE_Line_Chart = QAction(AzenqosDialog)
         self.actionLTE_Line_Chart.setObjectName("actionLTE_Line_Chart")
         self.actionLTE_RLC = QAction(AzenqosDialog)
         self.actionLTE_RLC.setObjectName("actionLTE_RLC")
         self.actionLTE_VoLTE = QAction(AzenqosDialog)
         self.actionLTE_VoLTE.setObjectName("actionLTE_VoLTE")
+
+        self.actionlte_rrc_sib_states = QAction(AzenqosDialog)
+        self.actionlte_rrc_sib_states.setObjectName("actionlte_rrc_sib_states")
+
         self.actionRadio_Parameters_4 = QAction(AzenqosDialog)
         self.actionRadio_Parameters_4.setObjectName("actionRadio_Parameters_4")
         self.actionServing_Neighbors_3 = QAction(AzenqosDialog)
@@ -386,8 +533,6 @@ class AzenqosDialog(QMainWindow):
         self.actionWifi_Graph.setObjectName("actionWifi_Graph")
         self.actionEvents = QAction(AzenqosDialog)
         self.actionEvents.setObjectName("actionEvents")
-        self.actionLayer_1_Messages = QAction(AzenqosDialog)
-        self.actionLayer_1_Messages.setObjectName("actionLayer_1_Messages")
         self.actionLayer_3_Messages = QAction(AzenqosDialog)
         self.actionLayer_3_Messages.setObjectName("actionLayer_3_Messages")
         self.actionBenchmark = QAction(AzenqosDialog)
@@ -401,6 +546,15 @@ class AzenqosDialog(QMainWindow):
         self.actionNR_Serving_Neighbors = QAction(AzenqosDialog)
         self.actionNR_Serving_Neighbors.setObjectName("actionNR_Serving_Neighbors")
 
+        self.actionCascadeWindow = QAction(AzenqosDialog)
+        self.actionCascadeWindow.setObjectName("cascadeWindow")
+        self.actionTileHorizontal = QAction(AzenqosDialog)
+        self.actionTileHorizontal.setObjectName("tileHorizontal")
+        self.actionTileVertical = QAction(AzenqosDialog)
+        self.actionTileVertical.setObjectName("tileVertical")
+        self.actionCloseAll = QAction(AzenqosDialog)
+        self.actionCloseAll.setObjectName("closeAll")
+
         self.menuFile.addAction(self.actionImport_log_azm)
         self.menuFile.addAction(self.actionExit)
         self.menuGSM.addAction(self.actionRadio_Parameters)
@@ -410,23 +564,22 @@ class AzenqosDialog(QMainWindow):
         self.menuGSM.addAction(self.actionGSM_Line_Chart)
         self.menuWCDMA.addAction(self.actionActive_Monitored_Sets)
         self.menuWCDMA.addAction(self.actionRadio_Parameters_2)
-        self.menuWCDMA.addAction(self.actionActive_Set_List)
-        self.menuWCDMA.addAction(self.actionMonitoSet_List)
         self.menuWCDMA.addAction(self.actionBLER_Summary)
-        self.menuWCDMA.addAction(self.actionBLER_Transport_Channel)
         self.menuWCDMA.addAction(self.actionLine_Chart)
         self.menuWCDMA.addAction(self.actionBearers)
         self.menuWCDMA.addAction(self.actionPilot_Poluting_Cells)
         self.menuWCDMA.addAction(self.actionActive_Monitored_Bar)
-        self.menuWCDMA.addAction(self.actionCM_GSM_Reports)
-        self.menuWCDMA.addAction(self.actionCM_GSM_Cells)
         self.menuWCDMA.addAction(self.actionPilot_Analyzer)
+
         self.menuLTE.addAction(self.actionRadio_Parameters_3)
         self.menuLTE.addAction(self.actionServing_Neighbors_2)
+        self.menuLTE.addAction(self.actionlte_rrc_sib_states)
         self.menuLTE.addAction(self.actionPUCCH_PDSCH_Parameters)
-        self.menuLTE.addAction(self.actionLTE_Line_Chart)
         self.menuLTE.addAction(self.actionLTE_RLC)
         self.menuLTE.addAction(self.actionLTE_VoLTE)
+        self.menuLTE.addAction(self.actionData)
+        self.menuLTE.addAction(self.actionLTE_Line_Chart)
+
         self.menuNR.addAction(self.actionNR_Radio_Parameters)
         self.menuNR.addAction(self.actionNR_Serving_Neighbors)
         self.menuCDMA_EVDO.addAction(self.actionRadio_Parameters_4)
@@ -445,7 +598,6 @@ class AzenqosDialog(QMainWindow):
         self.menuData.addAction(self.actionWifi_Graph)
         self.menuData.addAction(self.actionNR_Data_Line_Chart)
         self.menuSignaling.addAction(self.actionEvents)
-        self.menuSignaling.addAction(self.actionLayer_1_Messages)
         self.menuSignaling.addAction(self.actionLayer_3_Messages)
         self.menuSignaling.addAction(self.actionBenchmark)
         self.menuSignaling.addAction(self.actionMM_Reg_States)
@@ -457,15 +609,22 @@ class AzenqosDialog(QMainWindow):
         self.menuPresentation.addAction(self.menuCDMA_EVDO.menuAction())
         self.menuPresentation.addAction(self.menuData.menuAction())
         self.menuPresentation.addAction(self.menuSignaling.menuAction())
+        self.menuWindows.addAction(self.actionCascadeWindow)
+        self.menuWindows.addAction(self.actionTileHorizontal)
+        self.menuWindows.addAction(self.actionTileVertical)
+        self.menuWindows.addAction(self.actionCloseAll)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuPresentation.menuAction())
+        self.menubar.addAction(self.menuWindows.menuAction())
         self.menuPresentation.triggered.connect(self.selectPresentation)
         self.menuFile.triggered.connect(self.selectFileAction)
+        self.menuWindows.triggered.connect(self.selectWindowAction)
 
         # translate for menubar
         _translate = QtCore.QCoreApplication.translate
         self.menuFile.setTitle(_translate("AzenqosDialog", "File"))
         self.menuPresentation.setTitle(_translate("AzenqosDialog", "Presentation"))
+        self.menuWindows.setTitle(_translate("AzenqosDialog", "Windows"))
         self.menuGSM.setTitle(_translate("AzenqosDialog", "GSM"))
         self.menuWCDMA.setTitle(_translate("AzenqosDialog", "WCDMA"))
         self.menuLTE.setTitle(_translate("AzenqosDialog", "LTE"))
@@ -494,16 +653,7 @@ class AzenqosDialog(QMainWindow):
         self.actionRadio_Parameters_2.setText(
             _translate("AzenqosDialog", "Radio Parameters")
         )
-        self.actionActive_Set_List.setText(
-            _translate("AzenqosDialog", "Active Set List")
-        )
-        self.actionMonitoSet_List.setText(
-            _translate("AzenqosDialog", "Monitored Set List")
-        )
         self.actionBLER_Summary.setText(_translate("AzenqosDialog", "BLER Summary"))
-        self.actionBLER_Transport_Channel.setText(
-            _translate("AzenqosDialog", "BLER / Transport Channel")
-        )
         self.actionLine_Chart.setText(_translate("AzenqosDialog", "Line Chart"))
         self.actionBearers.setText(_translate("AzenqosDialog", "Bearers"))
         self.actionPilot_Poluting_Cells.setText(
@@ -512,8 +662,6 @@ class AzenqosDialog(QMainWindow):
         self.actionActive_Monitored_Bar.setText(
             _translate("AzenqosDialog", "Active + Monitored Bar")
         )
-        self.actionCM_GSM_Reports.setText(_translate("AzenqosDialog", "CM GSM Reports"))
-        self.actionCM_GSM_Cells.setText(_translate("AzenqosDialog", "CM GSM Cells"))
         self.actionPilot_Analyzer.setText(_translate("AzenqosDialog", "Pilot Analyzer"))
         self.actionRadio_Parameters_3.setText(
             _translate("AzenqosDialog", "Radio Parameters")
@@ -524,9 +672,15 @@ class AzenqosDialog(QMainWindow):
         self.actionPUCCH_PDSCH_Parameters.setText(
             _translate("AzenqosDialog", "PUCCH/PDSCH Parameters")
         )
+        self.actionData.setText(_translate("AzenqosDialog", "Data"))
         self.actionLTE_Line_Chart.setText(_translate("AzenqosDialog", "LTE Line Chart"))
         self.actionLTE_RLC.setText(_translate("AzenqosDialog", "LTE RLC"))
         self.actionLTE_VoLTE.setText(_translate("AzenqosDialog", "LTE VoLTE"))
+
+        self.actionlte_rrc_sib_states.setText(
+            _translate("AzenqosDialog", "LTE RRC/SIB States")
+        )
+
         self.actionRadio_Parameters_4.setText(
             _translate("AzenqosDialog", "Radio Parameters")
         )
@@ -572,9 +726,6 @@ class AzenqosDialog(QMainWindow):
         )
         self.actionWifi_Graph.setText(_translate("AzenqosDialog", "Wifi Graph"))
         self.actionEvents.setText(_translate("AzenqosDialog", "Events"))
-        self.actionLayer_1_Messages.setText(
-            _translate("AzenqosDialog", "Layer 1 Messages")
-        )
         self.actionLayer_3_Messages.setText(
             _translate("AzenqosDialog", "Layer 3 Messages")
         )
@@ -586,6 +737,12 @@ class AzenqosDialog(QMainWindow):
         self.actionNR_Serving_Neighbors.setText(
             _translate("AzenqosDialog", "Serving + Neighbors")
         )
+        self.actionCascadeWindow.setText(_translate("AzenqosDialog", "Cascade"))
+        self.actionTileHorizontal.setText(
+            _translate("AzenqosDialog", "Tile Horizontally")
+        )
+        self.actionTileVertical.setText(_translate("AzenqosDialog", "Tile Vertically"))
+        self.actionCloseAll.setText(_translate("AzenqosDialog", "Close All"))
 
     def selectPresentation(self, widget):
         parent = widget.associatedWidgets()
@@ -599,11 +756,55 @@ class AzenqosDialog(QMainWindow):
         elif option == "actionImport_log_azm":
             self.importDatabase()
 
+    def selectWindowAction(self, widget):
+        option = widget.objectName()
+        if option == "cascadeWindow":
+            self.mdi.cascadeSubWindows()
+        elif option == "tileHorizontal":
+            self.tileHorizontally()
+        elif option == "tileVertical":
+            self.tileVertically()
+        elif option == "closeAll":
+            self.mdi.closeAllSubWindows()
+
+    def tileHorizontally(self):
+        position = QPoint(0, 0)
+        if len(self.mdi.subWindowList()) < 2:
+            self.mdi.tileSubWindows()
+        else:
+            for subWindow in self.mdi.subWindowList():
+                rect = QRect(
+                    0,
+                    0,
+                    self.mdi.width(),
+                    self.mdi.height() / len(self.mdi.subWindowList()),
+                )
+                subWindow.setGeometry(rect)
+                subWindow.move(position)
+                position.setY(position.y() + subWindow.height())
+
+    def tileVertically(self):
+        position = QPoint(0, 0)
+        if len(self.mdi.subWindowList()) < 2:
+            self.mdi.tileSubWindows()
+        else:
+            for subWindow in self.mdi.subWindowList():
+                rect = QRect(
+                    0,
+                    0,
+                    self.mdi.width() / len(self.mdi.subWindowList()),
+                    self.mdi.height(),
+                )
+                subWindow.setGeometry(rect)
+                subWindow.move(position)
+                position.setX(position.x() + subWindow.width())
+
     def setupUi(self, AzenqosDialog):
         AzenqosDialog.setObjectName("AzenqosDialog")
         AzenqosDialog.resize(640, 480)
         # self.setupTreeWidget(AzenqosDialog)
         self.mdi = GroupArea()
+        gc.mdi = self.mdi
         self.setCentralWidget(self.mdi)
         toolbar = self.addToolBar("Azenqos Toolbar")
         self.toolbar = toolbar
@@ -695,8 +896,8 @@ class AzenqosDialog(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(AzenqosDialog)
 
         gc.timeSlider.valueChanged.connect(self.timeChange)
-        self.loadBtn.clicked.connect(self.loadFile)
-        self.saveBtn.clicked.connect(self.saveFile)
+        self.loadBtn.clicked.connect(self.loadWorkspaceFile)
+        self.saveBtn.clicked.connect(self.saveWorkspaceFile)
         self.layerSelect.clicked.connect(self.selectLayer)
         self.importDatabaseBtn.clicked.connect(self.importDatabase)
         self.maptool.clicked.connect(self.setMapTool)
@@ -801,23 +1002,20 @@ class AzenqosDialog(QMainWindow):
         wcdma = QTreeWidgetItem(self.presentationTreeWidget, ["WCDMA"])
         wcdmaActiveMonitoredSets = QTreeWidgetItem(wcdma, ["Active + Monitored Sets"])
         wcdmaRadioParams = QTreeWidgetItem(wcdma, ["Radio Parameters"])
-        wcdmaASL = QTreeWidgetItem(wcdma, ["Active Set List"])
-        wcdmaMonitoredSet = QTreeWidgetItem(wcdma, ["Monitored Set List"])
         wcdmaSummary = QTreeWidgetItem(wcdma, ["BLER Summary"])
-        wcdmaTransportChannel = QTreeWidgetItem(wcdma, ["BLER / Transport Channel"])
         wcdmaLineChart = QTreeWidgetItem(wcdma, ["Line Chart"])
         wcdmaBearers = QTreeWidgetItem(wcdma, ["Bearers"])
         wcdmaPilotPoluting = QTreeWidgetItem(wcdma, ["Pilot Poluting Cells"])
         wcdmaActiveMonitoredBar = QTreeWidgetItem(wcdma, ["Active + Monitored Bar"])
-        wcdmaReports = QTreeWidgetItem(wcdma, ["CM GSM Reports"])
-        wcdmaCells = QTreeWidgetItem(wcdma, ["CM GSM Cells"])
         wcdmaPilotAnalyzer = QTreeWidgetItem(wcdma, ["Pilot Analyzer"])
 
         # LTE Section
         lte = QTreeWidgetItem(self.presentationTreeWidget, ["LTE"])
         lteRadioParams = QTreeWidgetItem(lte, ["Radio Parameters"])
         lteServingNeighbors = QTreeWidgetItem(lte, ["Serving + Neighbors"])
+        QTreeWidgetItem(lte, ["LTE RRC/SIB States"])
         ltePPParams = QTreeWidgetItem(lte, ["PUCCH/PDSCH Parameters"])
+        lteData = QTreeWidgetItem(lte, ["Data"])
         lteLineChart = QTreeWidgetItem(lte, ["LTE Line Chart"])
         lteRlc = QTreeWidgetItem(lte, ["LTE RLC"])
         lteVo = QTreeWidgetItem(lte, ["LTE VoLTE"])
@@ -845,7 +1043,6 @@ class AzenqosDialog(QMainWindow):
         # Signaling Section
         signaling = QTreeWidgetItem(self.presentationTreeWidget, ["Signaling"])
         signalingEvents = QTreeWidgetItem(signaling, ["Events"])
-        # signalingLayerOne = QTreeWidgetItem(signaling, ['Layer 1 Messages'])
         signalingLayerThree = QTreeWidgetItem(signaling, ["Layer 3 Messages"])
         signalingBenchmark = QTreeWidgetItem(signaling, ["Benchmark"])
         signalingMM = QTreeWidgetItem(signaling, ["MM Reg States"])
@@ -906,6 +1103,7 @@ class AzenqosDialog(QMainWindow):
         self.pauseButton.clicked.connect(self.pauseTime)
 
     def startPlaytimeThread(self):
+        print("%s: startPlaytimeThread" % os.path.basename(__file__))
         if self.timeSliderThread.getCurrentValue() < gc.sliderLength:
             gc.isSliderPlay = True
             self.playButton.setDisabled(True)
@@ -919,6 +1117,7 @@ class AzenqosDialog(QMainWindow):
         self.clickTool.canvasClicked.connect(self.clickCanvas)
 
     def selectLayer(self):
+        print("%s: selectLayer" % os.path.basename(__file__))
         vlayer = iface.addVectorLayer(self.databaseUi.databasePath, None, "ogr")
 
         # Setting CRS
@@ -934,6 +1133,7 @@ class AzenqosDialog(QMainWindow):
         gc.isSliderPlay = False
 
     def setTimeValue(self, value):
+        print("%s: setTimeValue" % os.path.basename(__file__))
         gc.timeSlider.setValue(value)
         gc.timeSlider.update()
         if value >= gc.sliderLength:
@@ -968,45 +1168,39 @@ class AzenqosDialog(QMainWindow):
             if not layer:
                 continue
 
-            # if layer.type() == layer.VectorLayer:
-            #     if layer.featureCount() == 0:
-            #         # There are no features - skip
-            #         continue
-
-            #     # Loop through all features in the layer
-            #     for f in layer.getFeatures():
-            #         distance = -1.0
-
-            #         if f.geometry():
-            #             featurePoint = f.geometry().asPoint()
-            #             featurePoint = self.canvas.getCoordinateTransform().toMapCoordinates(
-            #                 featurePoint.x(), featurePoint.y()
-            #             )
-            #             distance = featurePoint.distance(point)
-            #         if distance != -1.0 and distance <= 0.005:
-            #             closestFeatureId = f.id()
-            #             time = layer.getFeature(closestFeatureId).attribute("time")
-            #             info = (layer, closestFeatureId, distance, time)
-            #             layerData.append(info)
-
             if layer.type() == layer.VectorLayer:
                 if layer.featureCount() == 0:
                     # There are no features - skip
                     continue
+                print("layer.name()", layer.name())
 
+                # Loop through all features in a rect near point xy
+                offset = 0.0005
+                p1 = QgsPointXY(point.x() - offset, point.y() - offset)
+                p2 = QgsPointXY(point.x() + offset, point.y() + offset)
+                rect = QgsRectangle(p1, p2)
+                nearby_features = layer.getFeatures(rect)
+                for f in nearby_features:
+                    distance = f.geometry().distance(QgsGeometry.fromPointXY(point))
+                    if distance != -1.0 and distance <= 0.001:
+                        closestFeatureId = f.id()
+                        time = layer.getFeature(closestFeatureId).attribute("time")
+                        info = (layer, closestFeatureId, distance, time)
+                        layerData.append(info)
+
+                """
                 # Loop through all features in the layer
                 for f in layer.getFeatures():
                     distance = f.geometry().distance(QgsGeometry.fromPointXY(point))
                     if distance != -1.0 and distance <= 0.001:
                         closestFeatureId = f.id()
-                        time = None
-                        try:
-                            time = layer.getFeature(closestFeatureId).attribute("time")
-                        except:
-                            time = f["time"]
-                        if time:
-                            info = (layer, closestFeatureId, distance, time)
-                            layerData.append(info)
+                        cf = layer.getFeature(closestFeatureId)
+                        print("cf.attributes:", cf.attributes())
+                        print("cf.fields:", cf.fields().toList())
+                        time = cf.attribute("time")
+                        info = (layer, closestFeatureId, distance, time)
+                        layerData.append(info)
+                """
 
         if not len(layerData) > 0:
             # Looks like no vector layers were found - do nothing
@@ -1019,7 +1213,6 @@ class AzenqosDialog(QMainWindow):
             # layer.select(closestFeatureId)
             selectedTime = time
             break
-
         try:
             selectedTimestamp = Utils().datetimeStringtoTimestamp(
                 selectedTime.toString("yyyy-MM-dd HH:mm:ss.zzz")
@@ -1034,7 +1227,8 @@ class AzenqosDialog(QMainWindow):
             # self.canvas.refreshgc.tableList()
 
     def clickCanvasWorker(self, point, button):
-        worker = Worker(self.clickCanvas(point, button))
+        print("%s: clickCanvasWorker" % os.path.basename(__file__))
+        worker = Worker(self.clickCanvas, point, button)
         gc.threadpool.start(worker)
 
     def useCustomMapTool(self):
@@ -1056,46 +1250,182 @@ class AzenqosDialog(QMainWindow):
         # self.hide()
 
     def timeChange(self):
-        value = gc.timeSlider.value()
-        timestampValue = gc.minTimeValue + value
-        sampledate = datetime.datetime.fromtimestamp(timestampValue)
-        self.timeEdit.setDateTime(sampledate)
-        self.timeSliderThread.set(value)
-        gc.currentTimestamp = timestampValue
-        gc.currentDateTimeString = "%s" % (
-            datetime.datetime.fromtimestamp(gc.currentTimestamp).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        ret = self.timechange_to_service_counter.inc_and_get()
+        print(
+            "%s: timeChange: timechange_to_service_counter: %d"
+            % (os.path.basename(__file__), ret)
         )
-        if len(gc.openedWindows) > 0:
-            for window in gc.openedWindows:
-                if not window.title in gc.linechartWindowname:
-                    worker = Worker(window.hilightRow(sampledate))
-                else:
-                    worker = Worker(window.moveChart(sampledate))
-                gc.threadpool.start(worker)
-        # text = "[--" + str(len(gc.tableList) + "--]"
-        # QgsMessageLog.logMessage(text)
+
+    def timeChangedWorkerFunc(self):
+        print("timeChangedWorkerFunc START")
+        while True:
+            try:
+                if self.closed:
+                    break
+                ret = self.timechange_to_service_counter.get()
+                if ret > 1:
+                    self.timechange_to_service_counter.dec_and_get()
+                    continue  # skip until we remain 1 then do work
+                if ret == 1:
+                    print(
+                        "%s: timeChangedWorkerFunc: timechange_to_service_counter: %d so calling timeChangeImpl() START"
+                        % (os.path.basename(__file__), ret)
+                    )
+                    self.timeChangeImpl()
+                    print(
+                        "%s: timeChangedWorkerFunc: timechange_to_service_counter: %d so calling timeChangeImpl() END"
+                        % (os.path.basename(__file__), ret)
+                    )
+                    ret = self.timechange_to_service_counter.dec_and_get()
+                # print("%s: timeChangedWorkerFunc: timechange_to_service_counter: %d" % (os.path.basename(__file__), ret))
+            except:
+                type_, value_, traceback_ = sys.exc_info()
+                exstr = str(traceback.format_exception(type_, value_, traceback_))
+                print("WARNING: timeChangedWorkerFunc - exception: {}".format(exstr))
+            # print("{}: timeChangedWorkerFunc thread gc.threadpool.maxThreadCount() {} gc.threadpool.activeThreadCount() {}".format(os.path.basename(__file__), gc.threadpool.maxThreadCount(),  gc.threadpool.activeThreadCount()))
+            time.sleep(0.1)
+
+        print("timeChangedWorkerFunc END")
+
+    def timeChangeImpl(self):
+        print("%s: timeChange0" % os.path.basename(__file__))
+        value = gc.timeSlider.value()
+        # print("%s: timeChange1" % os.path.basename(__file__))
+        timestampValue = gc.minTimeValue + value
+        # print("%s: timeChange2" % os.path.basename(__file__))
+        sampledate = datetime.datetime.fromtimestamp(timestampValue)
+        # print("%s: timeChange3" % os.path.basename(__file__))
+        # print("%s: timeChange4" % os.path.basename(__file__))
+        self.timeSliderThread.set(value)
+        # print("%s: timeChange5" % os.path.basename(__file__))
+        gc.currentTimestamp = timestampValue
+        # print("%s: timeChange6" % os.path.basename(__file__))
+        gc.currentDateTimeString = "%s" % (
+            datetime.datetime.fromtimestamp(gc.currentTimestamp).strftime(
+                "%Y-%m-%d %H:%M:%S.%f"
+            )[:-3]
+        )
+        # print("%s: timeChange7" % os.path.basename(__file__))
+        # print("signal_ui_thread_emit_time_slider_updated.emit()")
+        self.signal_ui_thread_emit_time_slider_updated.emit(gc.currentTimestamp)
 
         if len(gc.activeLayers) > 0:
             QgsMessageLog.logMessage("[-- have gc.tableList --]")
-            worker = Worker(self.hilightFeature())
-            gc.threadpool.start(worker)
+            self.hilightFeature()
+
+        # print("%s: timeChange8" % os.path.basename(__file__))
+
+        if len(gc.openedWindows) > 0:
+            for window in gc.openedWindows:
+                worker = None
+                if not window.title in gc.linechartWindowname:
+                    print(
+                        "%s: timeChange7 hilightrow window %s"
+                        % (os.path.basename(__file__), window.title)
+                    )
+                    window.hilightRow(sampledate)
+                else:
+                    print(
+                        "%s: timeChange7 movechart window %s"
+                        % (os.path.basename(__file__), window.title)
+                    )
+                    window.moveChart(sampledate)
+        print("%s: timeChange9" % os.path.basename(__file__))
+        # text = "[--" + str(len(gc.tableList) + "--]"
+        # QgsMessageLog.logMessage(text)
+
+        print(
+            "{}: timeChange end1 gc.threadpool.maxThreadCount() {} gc.threadpool.activeThreadCount() {}".format(
+                os.path.basename(__file__),
+                gc.threadpool.maxThreadCount(),
+                gc.threadpool.activeThreadCount(),
+            )
+        )
 
     # def threadComplete(self):
     #     QgsMessageLog.logMessage('[-- THREAD COMPLETE --]')
     #     iface.mapCanvas().refresh()
 
-    def hilightFeature(self):
-        QgsMessageLog.logMessage("[-- Start hilight features --]")
-        start_time = time.time()
-        self.getPosIdsByTable()
-        if len(self.posIds) > 0 and len(self.posObjs) > 0:
-            self.usePosIdsSelectedFeatures()
-        QgsMessageLog.logMessage("[-- End hilight features --]")
+    def hilightFeature(self, time_mode=True):
+        if time_mode:
+            self.selectFeatureOnLayersByTime()
+        else:
+            print("%s: hilightFeature" % os.path.basename(__file__))
+            QgsMessageLog.logMessage("[-- Start hilight features --]")
+            start_time = time.time()
+            self.getPosIdsByTable()
+            if len(self.posIds) > 0 and len(self.posObjs) > 0:
+                self.usePosIdsSelectedFeatures()
+            QgsMessageLog.logMessage("[-- End hilight features --]")
+
+    def selectFeatureOnLayersByTime(self):
+        root = QgsProject.instance().layerTreeRoot()
+        layers = root.findLayers()
+        for layer in layers:
+            if layer.name() not in gc.activeLayers:
+                continue
+            try:
+                # print("selectFeatureOnLayersByTime layer: %s" % layer.name())
+                end_dt = datetime.datetime.fromtimestamp(gc.currentTimestamp)
+                start_dt = end_dt - datetime.timedelta(
+                    seconds=(gc.DEFAULT_LOOKBACK_DUR_MILLIS / 1000.0)
+                )
+                # 2020-10-08 15:35:55.431000
+                filt_expr = "time >= '%s' and time <= '%s'" % (start_dt, end_dt)
+                # print("filt_expr:", filt_expr)
+                request = (
+                    QgsFeatureRequest()
+                    .setFilterExpression(filt_expr)
+                    .setFlags(QgsFeatureRequest.NoGeometry)
+                )
+
+                layerFeatures = layer.layer().getFeatures(request)
+                # print("filt request ret:", layerFeatures)
+                lc = 0
+                fids = []
+                time_list = []
+                for lf in layerFeatures:
+                    lc += 1
+                    fids.append(lf.id())
+                    time_list.append(lf.attribute("time"))
+                if len(fids):
+                    sr = pd.Series(time_list, index=fids, dtype="datetime64[ns]")
+                    sids = [sr.idxmax()]
+                    # print("sr:", sr)
+                    # print("select ids:", sids)
+                    layer.layer().selectByIds(sids)
+            except:
+                type_, value_, traceback_ = sys.exc_info()
+                exstr = str(traceback.format_exception(type_, value_, traceback_))
+                print(
+                    "WARNING: selectFeatureOnLayersByTime layer.name() {} exception: {}".format(
+                        layer.name(), exstr
+                    )
+                )
+            """
+            root = QgsProject.instance().layerTreeRoot()
+            root.setHasCustomLayerOrder(True)
+            order = root.customLayerOrder()
+            order.insert(0, order.pop(order.index(layer)))  # vlayer to the top
+            root.setCustomLayerOrder(order)
+            iface.setActiveLayer(layer)
+
+            for feature in layerFeatures:
+                posid = feature["posid"]
+                if self.currentMaxPosId == posid:
+                    selected_ids.append(feature.id())
+            QgsMessageLog.logMessage("selected_ids: {0}".format(str(selected_ids)))
+
+            if layer is not None:
+                if len(selected_ids) > 0:
+                    layer.selectByIds(selected_ids, QgsVectorLayer.SetSelection)
+            """
 
     def getPosIdsByTable(self):
+        print("%s: getPosIdsByTable" % os.path.basename(__file__))
         gc.azenqosDatabase.open()
         # start_time = time.time()
-        QgsMessageLog.logMessage("tables: " + str(gc.tableList))
+        # QgsMessageLog.logMessage("tables: " + str(gc.tableList))
         self.posObjs = []
         self.posIds = []
         for tableName in gc.activeLayers:
@@ -1121,6 +1451,7 @@ class AzenqosDialog(QMainWindow):
         gc.azenqosDatabase.close()
 
     def usePosIdsSelectedFeatures(self):
+        print("%s: usePosIdsSelectedFeatures" % os.path.basename(__file__))
         if self.posIds:
             selected_ids = []
             layerName = None
@@ -1168,6 +1499,14 @@ class AzenqosDialog(QMainWindow):
 
     def classifySelectedItems(self, parent, child):
         windowName = parent + "_" + child
+        print(
+            "classifySelectedItems windowName:",
+            windowName,
+            "parent:",
+            parent,
+            "child:",
+            child,
+        )
         if hasattr(self, "mdi") is False:
             self.mdi = GroupArea()
         subwindowList = self.mdi.subWindowList()
@@ -1175,6 +1514,7 @@ class AzenqosDialog(QMainWindow):
             if child == "Radio Parameters":
                 if hasattr(self, "gsm_rdp_window") is True:
                     tableWindow = self.gsm_rdp_window.widget()
+                    tableWidget = None
                     if not tableWindow:
                         tableWidget = TableWindow(self.gsm_rdp_window, windowName)
                         gc.openedWindows.append(tableWidget)
@@ -1366,54 +1706,6 @@ class AzenqosDialog(QMainWindow):
                     self.wcdma_rp_window.show()
                     gc.openedWindows.append(tableWidget)
 
-            elif child == "Active Set List":
-                tableWidget = None
-                if hasattr(self, "wcdma_asl_window") is True:
-                    tableWindow = self.wcdma_asl_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_asl_window, windowName)
-                        gc.openedWindows.append(tableWidget)
-
-                    if self.wcdma_asl_window not in subwindowList:
-                        self.wcdma_asl_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.wcdma_asl_window)
-
-                    if tableWidget:
-                        self.wcdma_asl_window.setWidget(tableWidget)
-                    self.wcdma_asl_window.show()
-                else:
-                    # create new subwindow
-                    self.wcdma_asl_window = SubWindowArea(self.mdi)
-                    tableWidget = TableWindow(self.wcdma_asl_window, windowName)
-                    self.wcdma_asl_window.setWidget(tableWidget)
-                    self.mdi.addSubWindow(self.wcdma_asl_window)
-                    self.wcdma_asl_window.show()
-                    gc.openedWindows.append(tableWidget)
-
-            elif child == "Monitored Set List":
-                tableWidget = None
-                if hasattr(self, "wcdma_msl_window") is True:
-                    tableWindow = self.wcdma_msl_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_msl_window, windowName)
-                        gc.openedWindows.append(tableWidget)
-
-                    if self.wcdma_msl_window not in subwindowList:
-                        self.wcdma_msl_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.wcdma_msl_window)
-
-                    if tableWidget:
-                        self.wcdma_msl_window.setWidget(tableWidget)
-                    self.wcdma_msl_window.show()
-                else:
-                    # create new subwindow
-                    self.wcdma_msl_window = SubWindowArea(self.mdi)
-                    tableWidget = TableWindow(self.wcdma_msl_window, windowName)
-                    self.wcdma_msl_window.setWidget(tableWidget)
-                    self.mdi.addSubWindow(self.wcdma_msl_window)
-                    self.wcdma_msl_window.show()
-                    gc.openedWindows.append(tableWidget)
-
             elif child == "BLER Summary":
                 tableWidget = None
                 if hasattr(self, "wcdma_bler_window") is True:
@@ -1436,30 +1728,6 @@ class AzenqosDialog(QMainWindow):
                     self.wcdma_bler_window.setWidget(tableWidget)
                     self.mdi.addSubWindow(self.wcdma_bler_window)
                     self.wcdma_bler_window.show()
-                    gc.openedWindows.append(tableWidget)
-
-            elif child == "BLER / Transport Channel":
-                tableWidget = None
-                if hasattr(self, "wcdma_blertc_window") is True:
-                    tableWindow = self.wcdma_blertc_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_blertc_window, windowName)
-                        gc.openedWindows.append(tableWidget)
-
-                    if self.wcdma_blertc_window not in subwindowList:
-                        self.wcdma_blertc_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.wcdma_blertc_window)
-
-                    if tableWidget:
-                        self.wcdma_blertc_window.setWidget(tableWidget)
-                    self.wcdma_blertc_window.show()
-                else:
-                    # create new subwindow
-                    self.wcdma_blertc_window = SubWindowArea(self.mdi)
-                    tableWidget = TableWindow(self.wcdma_blertc_window, windowName)
-                    self.wcdma_blertc_window.setWidget(tableWidget)
-                    self.mdi.addSubWindow(self.wcdma_blertc_window)
-                    self.wcdma_blertc_window.show()
                     gc.openedWindows.append(tableWidget)
 
             elif child == "Line Chart":
@@ -1564,54 +1832,6 @@ class AzenqosDialog(QMainWindow):
                     self.wcdma_amb_window.show()
                     gc.openedWindows.append(tableWidget)
 
-            elif child == "CM GSM Reports":
-                tableWidget = None
-                if hasattr(self, "wcdma_report_window") is True:
-                    tableWindow = self.wcdma_report_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_report_window, windowName)
-                        gc.openedWindows.append(tableWidget)
-
-                    if self.wcdma_report_window not in subwindowList:
-                        self.wcdma_report_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.wcdma_report_window)
-
-                    if tableWidget:
-                        self.wcdma_report_window.setWidget(tableWidget)
-                    self.wcdma_report_window.show()
-                else:
-                    # create new subwindow
-                    self.wcdma_report_window = SubWindowArea(self.mdi)
-                    tableWidget = TableWindow(self.wcdma_report_window, windowName)
-                    self.wcdma_report_window.setWidget(tableWidget)
-                    self.mdi.addSubWindow(self.wcdma_report_window)
-                    self.wcdma_report_window.show()
-                    gc.openedWindows.append(tableWidget)
-
-            elif child == "CM GSM Cells":
-                tableWidget = None
-                if hasattr(self, "wcdma_cells_window") is True:
-                    tableWindow = self.wcdma_cells_window.widget()
-                    if not tableWindow:
-                        tableWidget = TableWindow(self.wcdma_cells_window, windowName)
-                        gc.openedWindows.append(tableWidget)
-
-                    if self.wcdma_cells_window not in subwindowList:
-                        self.wcdma_cells_window = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.wcdma_cells_window)
-
-                    if tableWidget:
-                        self.wcdma_cells_window.setWidget(tableWidget)
-                    self.wcdma_cells_window.show()
-                else:
-                    # create new subwindow
-                    self.wcdma_cells_window = SubWindowArea(self.mdi)
-                    tableWidget = TableWindow(self.wcdma_cells_window, windowName)
-                    self.wcdma_cells_window.setWidget(tableWidget)
-                    self.mdi.addSubWindow(self.wcdma_cells_window)
-                    self.wcdma_cells_window.show()
-                    gc.openedWindows.append(tableWidget)
-
             elif child == "Pilot Analyzer":
                 tableWidget = None
                 if hasattr(self, "wcdma_analyzer_window") is True:
@@ -1639,7 +1859,36 @@ class AzenqosDialog(QMainWindow):
                     gc.openedWindows.append(tableWidget)
 
         elif parent == "LTE":
-            if child == "Radio Parameters":
+            if child == "LTE RRC/SIB States":
+                print("enter RRC/SIB States")
+                tableWidget = None
+                if hasattr(self, "lte_rrc_sib_states_window") is True:
+                    tableWindow = self.lte_rrc_sib_states_window.widget()
+                    if not tableWindow:
+                        tableWidget = TableWindow(
+                            self.lte_rrc_sib_states_window, windowName
+                        )
+                        gc.openedWindows.append(tableWidget)
+
+                    if self.lte_rrc_sib_states_window not in subwindowList:
+                        self.lte_rrc_sib_states_window = SubWindowArea(self.mdi)
+                        self.mdi.addSubWindow(self.lte_rrc_sib_states_window)
+
+                    if tableWidget:
+                        self.lte_rrc_sib_states_window.setWidget(tableWidget)
+                    self.lte_rrc_sib_states_window.show()
+                else:
+                    # create new subwindow
+                    self.lte_rrc_sib_states_window = SubWindowArea(self.mdi)
+                    tableWidget = TableWindow(
+                        self.lte_rrc_sib_states_window, windowName
+                    )
+                    self.lte_rrc_sib_states_window.setWidget(tableWidget)
+                    self.mdi.addSubWindow(self.lte_rrc_sib_states_window)
+                    self.lte_rrc_sib_states_window.show()
+                    gc.openedWindows.append(tableWidget)
+
+            elif child == "Radio Parameters":
                 tableWidget = None
                 if hasattr(self, "lte_param_window") is True:
                     tableWindow = self.lte_param_window.widget()
@@ -1709,6 +1958,30 @@ class AzenqosDialog(QMainWindow):
                     self.lte_ppparam_window.setWidget(tableWidget)
                     self.mdi.addSubWindow(self.lte_ppparam_window)
                     self.lte_ppparam_window.show()
+                    gc.openedWindows.append(tableWidget)
+
+            elif child == "Data":
+                tableWidget = None
+                if hasattr(self, "lte_data_window") is True:
+                    tableWindow = self.lte_data_window.widget()
+                    if not tableWindow:
+                        tableWidget = TableWindow(self.lte_data_window, windowName)
+                        gc.openedWindows.append(tableWidget)
+
+                    if self.lte_data_window not in subwindowList:
+                        self.lte_data_window = SubWindowArea(self.mdi)
+                        self.mdi.addSubWindow(self.lte_data_window)
+
+                    if tableWidget:
+                        self.lte_data_window.setWidget(tableWidget)
+                    self.lte_data_window.show()
+                else:
+                    # create new subwindow
+                    self.lte_data_window = SubWindowArea(self.mdi)
+                    tableWidget = TableWindow(self.lte_data_window, windowName)
+                    self.lte_data_window.setWidget(tableWidget)
+                    self.mdi.addSubWindow(self.lte_data_window)
+                    self.lte_data_window.show()
                     gc.openedWindows.append(tableWidget)
 
             elif child == "LTE Line Chart":
@@ -2240,8 +2513,8 @@ class AzenqosDialog(QMainWindow):
                         self.events_window = SubWindowArea(self.mdi)
                         self.mdi.addSubWindow(self.events_window)
 
-                    if events_widget:
-                        self.events_window.setWidget(events_widget)
+                    if tableWindow:
+                        self.events_window.setWidget(tableWindow)
                     self.events_window.show()
 
                 else:
@@ -2253,59 +2526,33 @@ class AzenqosDialog(QMainWindow):
                     self.events_window.show()
                     gc.openedWindows.append(events_widget)
 
-            elif child == "Layer 1 Messages":
-                layer_one_widget = None
-                if hasattr(self, "layer_one_messages") is True:
-                    tableWindow = self.layer_one_messages.widget()
-                    if not tableWindow:
-                        layer_one_widget = TableWindow(
-                            self.layer_one_messages, windowName
-                        )
-                        gc.openedWindows.append(layer_one_widget)
-
-                    if self.layer_one_messages not in subwindowList:
-                        self.layer_one_messages = SubWindowArea(self.mdi)
-                        self.mdi.addSubWindow(self.layer_one_messages)
-
-                    if layer_one_widget:
-                        self.layer_one_messages.setWidget(layer_one_widget)
-                    self.layer_one_messages.show()
-
-                else:
-                    # create new subwindow
-                    self.layer_one_messages = SubWindowArea(self.mdi)
-                    layer_one_widget = TableWindow(self.layer_one_messages, windowName)
-                    self.layer_one_messages.setWidget(layer_one_widget)
-                    self.mdi.addSubWindow(self.layer_one_messages)
-                    self.layer_one_messages.show()
-                    gc.openedWindows.append(layer_one_widget)
-
-                # if hasattr(self, 'layer_one_messages') is False:
-                #     # self.layer_one_messages = TableWindow(self, windowName)
-                #     self.layer_one_messages = TableWindow(self, windowName)
-                # self.mdi.addSubWindow(self.layer_one_messages)
-                # gc.openedWindows.append(self.layer_one_messages)
-                # self.layer_one_messages.show()
-                # self.layer_one_messages.activateWindow()
             elif child == "Layer 3 Messages":
                 layer_three_widget = None
+                print("l30")
                 if hasattr(self, "layer_three_messages") is True:
                     tableWindow = self.layer_three_messages.widget()
+                    print("l31")
                     if not tableWindow:
+                        print("l32")
                         layer_three_widget = TableWindow(
                             self.layer_three_messages, windowName
                         )
                         gc.openedWindows.append(layer_three_widget)
 
+                    print("l33")
                     if self.layer_three_messages not in subwindowList:
+                        print("l34")
                         self.layer_three_messages = SubWindowArea(self.mdi)
                         self.mdi.addSubWindow(self.layer_three_messages)
-
-                    if layer_three_widget:
-                        self.layer_three_messages.setWidget(layer_three_widget)
+                    print("l35")
+                    if tableWindow:
+                        print("l36")
+                        self.layer_three_messages.setWidget(tableWindow)
+                    print("l37")
                     self.layer_three_messages.show()
-
+                    print("l38")
                 else:
+                    print("l39")
                     # create new subwindow
                     self.layer_three_messages = SubWindowArea(self.mdi)
                     layer_three_widget = TableWindow(
@@ -2492,88 +2739,112 @@ class AzenqosDialog(QMainWindow):
                     pass
 
     def killMainWindow(self):
+        self.cleanup()
         self.close()
+        """
         self.destroy(True, True)
-
         removeAzenqosGroup()
         for mdiwindow in self.mdi.subWindowList():
             mdiwindow.close()
         self.mdi.close()
+        """
 
     def removeToolBarActions(self):
         actions = self.toolbar.actions()
         for action in actions:
             self.toolbar.removeAction(action)
 
-    def loadFile(self):
-        fileName, _ = QFileDialog.getOpenFileName(
-            self, "Open Azenqos save file", QtCore.QDir.rootPath(), "*.azs"
+    def loadWorkspaceFile(self):
+        print("loadFile()")
+        fp, _ = QFileDialog.getOpenFileName(
+            self, "Open workspace file", QtCore.QDir.rootPath(), "*.ini"
         )
-        if fileName != "":
+        if fp:
+            print("loadWorkspaceFile:", fp)
             if len(gc.openedWindows) > 0:
-                for window in gc.openedWindows:
-                    window.close()
                 for mdiwindow in self.mdi.subWindowList():
                     mdiwindow.close()
                 gc.openedWindows = []
-            Utils().loadStateFromFile(fileName, self)
+            shutil.copyfile(fp, azq_utils.get_local_fp("settings.ini"))
+            self.settings.sync()  # load changes
+            self._gui_restore()
 
-    def saveFile(self):
-        fileName, _ = QFileDialog.getSaveFileName(
-            self, "Save Azenqos save file", QtCore.QDir.rootPath(), "*.azs"
+    def saveWorkspaceFile(self):
+        fp, _ = QFileDialog.getSaveFileName(
+            self, "Save workspace file", QtCore.QDir.rootPath(), "*.ini"
         )
-        if fileName != "":
-            Utils().saveStateToFile(fileName)
+        if fp:
+            print("saveWorkspaceFile:", fp)
+            self._gui_save()
+            self.settings.sync()  # save changes
+            shutil.copyfile(azq_utils.get_local_fp("settings.ini"), fp)
 
     def closeEvent(self, event):
+        print("azenqos_plugin_dialog: closeEvent:", event)
+        # just close it as it might be ordered by qgis close (unload()) too
+        self.cleanup()
+        event.accept()
+
+        """
         reply = None
         if self.newImport is False:
             reply = QMessageBox.question(
                 self,
                 "Quit Azenqos",
                 "Do you want to quit?",
+                QMessageBox.Yes|QMessageBox.No,
                 QMessageBox.Yes,
-                QMessageBox.No,
             )
 
         if reply == QMessageBox.Yes or self.newImport is True:
-            saving = Utils().saveState(gc.CURRENT_PATH)
-            iface.actionPan().trigger()
-            self.pauseTime()
-            self.timeSliderThread.exit()
-            self.removeToolBarActions()
-            self.quitTask = QuitTask(u"Quiting Plugin", self)
-            QgsApplication.taskManager().addTask(self.quitTask)
-
-            # Begin removing layer (which cause db issue)
-            project = QgsProject.instance()
-            for (id_l, layer) in project.mapLayers().items():
-                if layer.type() == layer.VectorLayer:
-                    layer.removeSelection()
-                to_be_deleted = project.mapLayersByName(layer.name())[0]
-                project.removeMapLayer(to_be_deleted.id())
-                layer = None
-
-            QgsProject.instance().reloadAllLayers()
-            QgsProject.instance().clear()
-            gc.tableList = []
-            gc.activeLayers = []
-
-            if len(gc.openedWindows) > 0:
-                for window in gc.openedWindows:
-                    window.close()
-                gc.openedWindows = []
-            QgsProject.removeAllMapLayers(QgsProject.instance())
-            # End removing layer
-
-            removeAzenqosGroup()
-            for mdiwindow in self.mdi.subWindowList():
-                mdiwindow.close()
-            self.mdi.close()
-            QgsMessageLog.logMessage("Close App")
+            self.cleanup()
             event.accept()
         else:
             event.ignore()
+        """
+
+    def cleanup(self):
+        self._gui_save()
+        # saving = Utils().saveState(gc.CURRENT_PATH)
+        iface.actionPan().trigger()
+        self.pauseTime()
+        self.timeSliderThread.exit()
+        self.removeToolBarActions()
+        self.quitTask = tasks.QuitTask(u"Quiting Plugin", self)
+        QgsApplication.taskManager().addTask(self.quitTask)
+
+        # Begin removing layer (which cause db issue)
+        project = QgsProject.instance()
+        for (id_l, layer) in project.mapLayers().items():
+            if layer.type() == layer.VectorLayer:
+                layer.removeSelection()
+            to_be_deleted = project.mapLayersByName(layer.name())[0]
+            project.removeMapLayer(to_be_deleted.id())
+            layer = None
+
+        QgsProject.instance().reloadAllLayers()
+        QgsProject.instance().clear()
+        # gc.tableList = []
+        gc.activeLayers = []
+
+        if len(gc.openedWindows) > 0:
+            for window in gc.openedWindows:
+                window.close()
+            gc.openedWindows = []
+        QgsProject.removeAllMapLayers(QgsProject.instance())
+        # End removing layer
+
+        removeAzenqosGroup()
+        for mdiwindow in self.mdi.subWindowList():
+            mdiwindow.close()
+        self.mdi.close()
+        QgsMessageLog.logMessage("Close App")
+        tasks.close_db()
+        try:
+            shutil.rmtree(gc.logPath)
+        except:
+            pass
+        self.closed = True
 
 
 class GroupArea(QMdiArea):
@@ -2589,3 +2860,6 @@ class SubWindowArea(QMdiSubWindow):
         super().__init__(item)
         dirname = os.path.dirname(__file__)
         self.setWindowIcon(QIcon(QPixmap(os.path.join(dirname, "icon.png"))))
+
+    def closeEvent(self, QCloseEvent):
+        gc.mdi.removeSubWindow(self)
