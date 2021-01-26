@@ -2682,7 +2682,7 @@ class AzenqosDialog(QMainWindow):
                     pass
 
     def killMainWindow(self):
-        self.cleanup()
+        # self.cleanup()
         self.close()
         """
         self.destroy(True, True)
@@ -2753,8 +2753,8 @@ class AzenqosDialog(QMainWindow):
         self.pauseTime()
         self.timeSliderThread.exit()
         self.removeToolBarActions()
-        self.quitTask = tasks.QuitTask(u"Quiting Plugin", self)
-        QgsApplication.taskManager().addTask(self.quitTask)
+        # self.quitTask = tasks.QuitTask(u"Quiting Plugin", self)
+        # QgsApplication.taskManager().addTask(self.quitTask)
 
         # Begin removing layer (which cause db issue)
         project = QgsProject.instance()
@@ -2764,6 +2764,7 @@ class AzenqosDialog(QMainWindow):
             to_be_deleted = project.mapLayersByName(layer.name())[0]
             project.removeMapLayer(to_be_deleted.id())
             layer = None
+            to_be_deleted = None
 
         QgsProject.instance().reloadAllLayers()
         QgsProject.instance().clear()
@@ -2783,11 +2784,16 @@ class AzenqosDialog(QMainWindow):
         self.mdi.close()
         QgsMessageLog.logMessage("Close App")
         tasks.close_db()
-        try:
-            shutil.rmtree(gc.logPath)
-        except:
-            pass
+        # try:
+        #     shutil.rmtree(gc.logPath)
+        #     break
+        # except Exception as e:
+        #     print(e)
+        #     pass
         self.closed = True
+        logPath = gc.logPath
+        self.cleanTask = tasks.CleanUpTask(u"Cleaning Files", self, logPath)
+        QgsApplication.taskManager().addTask(self.cleanTask)
 
 
 class GroupArea(QMdiArea):

@@ -186,21 +186,23 @@ class Utils:
         pass
 
     def unzipToFile(self, currentPath, filePath):
-        gc.logPath = currentPath + "/file/" + str(os.getpid())
+        logPath = currentPath + "/file/" + str(os.getpid())
         try:
             if not os.path.exists(currentPath + "/file"):
                 os.mkdir(currentPath + "/file")
-            if not os.path.exists(gc.logPath):
-                os.mkdir(gc.logPath)
+            if not os.path.exists(logPath):
+                os.mkdir(logPath)
             else:
-                shutil.rmtree(gc.logPath)
-                os.mkdir(gc.logPath)
-            if len(os.listdir(gc.logPath)) == 0:
+                logPath = currentPath + "/file/" + str(os.getpid()+1)
+                # shutil.rmtree(gc.logPath)
+                os.mkdir(logPath)
+            if len(os.listdir(logPath)) == 0:
                 with ZipFile(filePath, "r") as zip_obj:
                     filesContain = zip_obj.namelist()
                     for fileName in filesContain:
-                        zip_obj.extract(fileName, gc.logPath)
-                db_file_path = gc.logPath + "/azqdata.db"
+                        zip_obj.extract(fileName, logPath)
+                db_file_path = logPath + "/azqdata.db"
+                gc.logPath = logPath
                 return db_file_path
         except Exception as e:
             print(e)

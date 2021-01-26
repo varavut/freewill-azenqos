@@ -1,5 +1,6 @@
 import sys
 import os
+import shutil
 
 # Adding folder path
 sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)))
@@ -138,6 +139,7 @@ class QuitTask(QgsTask):
             )
             if self.azqMain.newImport is False:
                 self.azqMain.databaseUi.removeMainMenu()
+            
         else:
             if self.exception is None:
                 QgsMessageLog.logMessage(
@@ -154,6 +156,60 @@ class QuitTask(QgsTask):
                 )
                 raise self.exception
 
+class CleanUpTask(QgsTask):
+    def __init__(self, desc, azenqosMain, logPath):
+        QgsTask.__init__(self, desc)
+        self.desc = desc
+        self.isSuccess = False
+        self.logPath = logPath
+
+    def run(self):
+        print(
+            "[-- Start Cleaning Files --]"
+        )
+        self.start_time = time.time()
+        while True:
+            try:
+                if os.path.exists(gc.databasePath):
+                    shutil.rmtree(self.logPath)
+                    self.isSuccess = True
+                    
+                else:
+                    self.isSuccess = True
+
+                break
+            except Exception as e:
+                # print(e)
+                self.exception = e
+                pass
+        print("Delete success!!")
+        return self.isSuccess
+
+    def finished(self, result):
+        if result:
+            elapsed_time = time.time() - self.start_time
+            QgsMessageLog.logMessage(
+                "Elapsed time: " + str(elapsed_time) + " s.", tag="Processing"
+            )
+            print(
+                "[-- End Cleaning files --]"
+            )
+            
+        else:
+            if self.exception is None:
+                QgsMessageLog.logMessage(
+                    'Task "{name}" not successful but without '
+                    "exception (probably the task was manually "
+                    "canceled by the user)".format(name=self.desc),
+                    tag="Exception",
+                )
+            else:
+                QgsMessageLog.logMessage(
+                    'Task "{name}" Exception: {exception}'.format(name=self.desc),
+                    exception=self.exception,
+                    tag="Exception",
+                )
+                raise self.exception
 
 def close_db():
     if gc.dbcon:
