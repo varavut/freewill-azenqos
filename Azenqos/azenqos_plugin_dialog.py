@@ -1387,7 +1387,10 @@ class AzenqosDialog(QMainWindow):
                 for lf in layerFeatures:
                     lc += 1
                     fids.append(lf.id())
-                    time_list.append(lf.attribute("time"))
+                    time = lf.attribute("time")
+                    if isinstance(time,QtCore.QDateTime):
+                         time = time.toString("yyyy-MM-dd hh:mm:ss.zzz")
+                    time_list.append(time)
                 if len(fids):
                     sr = pd.Series(time_list, index=fids, dtype="datetime64[ns]")
                     sids = [sr.idxmax()]
