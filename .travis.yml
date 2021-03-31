@@ -2,5 +2,6 @@ language: python
 install:
   - pip install -r requirements-dev.txt
   - pip install -r requirements.txt
-script: 
-  - bash Azenqos/test.sh
+deploy:
+  - provider: script
+    script: bash Azenqos/test.sh staging
