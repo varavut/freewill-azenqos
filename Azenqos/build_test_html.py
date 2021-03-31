@@ -11,7 +11,7 @@ def runcommand (cmd):
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out, std_err
 
-htmlString = "<html> "
+htmlString = "<html>"
 htmlString += "<body>"
 
 files = []
