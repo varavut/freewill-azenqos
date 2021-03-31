@@ -2,16 +2,18 @@ import os
 import sys
 import subprocess
 
+path = os.path.dirname(os.path.abspath(__file__))
+
 def runcommand (cmd):
     proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
-                            universal_newlines=True)
+                            universal_newlines=True,
+                            cwd=path)
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out, std_err
 
-path = os.path.dirname(os.path.abspath(__file__))
 htmlString = "<html>"
 htmlString += "<body>"
 
