@@ -11,13 +11,15 @@ def runcommand (cmd):
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out, std_err
 
+path = os.path.dirname(os.path.abspath(__file__))
 htmlString = "<html>"
 htmlString += "<body>"
 
 files = []
-for file in os.listdir("./"):
+for file in os.listdir(path):
     if file.startswith("test_") and file.endswith(".py"):
-        (ret, out, err) = runcommand(sys.executable + " " + file)
+        print(sys.executable + " " + os.path.join(path,file))
+        (ret, out, err) = runcommand(sys.executable + " " + os.path.join(path,file))
         if ret == 0:
             htmlString += "&#9989; " + file
         else:
@@ -30,9 +32,10 @@ for file in os.listdir("./"):
 htmlString += "</body>"
 htmlString += "</html>"
 
-if not os.path.exists('build'):
-    os.makedirs('build')
+buildPath = os.path.join(path,'build')
+if not os.path.exists(buildPath):
+    os.makedirs(buildPath)
 
-f = open("build/index.html", "w")
+f = open(os.path.join(buildPath,'index.html'), "w")
 f.write(htmlString)
 f.close()
